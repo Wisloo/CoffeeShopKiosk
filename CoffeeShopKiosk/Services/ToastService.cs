@@ -15,8 +15,11 @@ namespace CoffeeShopKiosk.Services
     {
         public ObservableCollection<Toast> Toasts { get; } = new ObservableCollection<Toast>();
 
-        public void Show(string message, int durationMs = 2800)
+        public bool Muted { get; set; } = false;
+
+        public void Show(string message, int durationMs = 2800, bool force = false)
         {
+            if (Muted && !force) return;
             var t = new Toast { Message = message };
             App.Current.Dispatcher.Invoke(() => Toasts.Add(t));
 

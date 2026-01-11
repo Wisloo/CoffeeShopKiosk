@@ -3,7 +3,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:CoffeeShopKiosk.Views"
     Title="Coffee Shop Kiosk" WindowState="Maximized" WindowStyle="SingleBorderWindow" ResizeMode="CanResize">
-    <Grid>
+    <Window.InputBindings>
+        <KeyBinding Key="S" Modifiers="Control, Shift" Command="{Binding ToggleStudyModeCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
+    </Window.InputBindings>    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="100"/>
             <RowDefinition Height="*"/>

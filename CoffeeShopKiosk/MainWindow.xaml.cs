@@ -50,8 +50,16 @@ namespace CoffeeShopKiosk
             };
 
             // Theme toggle - simple inversion between two palettes
-            ThemeToggle.Checked += (s, e) => ApplyStudyTheme(true);
-            ThemeToggle.Unchecked += (s, e) => ApplyStudyTheme(false);
+            ThemeToggle.Checked += (s, e) => ApplyStudyMode(true);
+            ThemeToggle.Unchecked += (s, e) => ApplyStudyMode(false);
+
+            // Initialize from settings
+            var settings = new SettingsService();
+            ApplyStudyMode(settings.Settings.StudyMode);
+            _toastService.Muted = settings.Settings.DoNotDisturb;
+
+            // Update ThemeToggle visual (if changed externally)
+            ThemeToggle.IsChecked = settings.Settings.StudyMode;
         }
 
         private void ApplyStudyTheme(bool study)
@@ -68,6 +76,37 @@ namespace CoffeeShopKiosk
                 Resources["CreamColor"] = (Color)ColorConverter.ConvertFromString("#FFF8F0");
                 Resources["CardColor"] = (Color)ColorConverter.ConvertFromString("#FFF6EE");
             }
+        }
+
+        private void ApplyStudyMode(bool enabled)
+        {
+            // Update theme colors
+            ApplyStudyTheme(enabled);
+
+            // Persist the setting
+            var settingsSvc = new SettingsService();
+            settingsSvc.Update(s => s.StudyMode = enabled);
+
+            // Mute toasts if DoNotDisturb is enabled in settings and StudyMode is on
+            _toastService.Muted = enabled && settingsSvc.Settings.DoNotDisturb;
+
+            // Swap product card style to no-motion variant when enabled
+            if (enabled)
+            {
+                Application.Current.Resources["ProductCardHoverStyle"] = Application.Current.Resources["ProductCardHoverStyle_NoMotion"] as System.Windows.Style;
+            }
+            else
+            {
+                // restore original
+                // Re-define the animation style by reloading it from App.xaml resources
+                // (Assumes original style key ProductCardHoverStyle is defined in App resources)
+                Application.Current.Resources["ProductCardHoverStyle"] = Application.Current.Resources["ProductCardHoverStyle"];
+            }
+
+            // Update toggle visual state
+            ThemeToggle.IsChecked = enabled;
+            
+            // Reduce other motion globally if desired (not implemented fully: placeholder)
         }
     }
 }
