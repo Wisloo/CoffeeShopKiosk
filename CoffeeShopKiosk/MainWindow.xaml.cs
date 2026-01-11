@@ -68,19 +68,17 @@ namespace CoffeeShopKiosk
                 }
             };
 
-            // Theme toggle - route through the ViewModel so both sides stay in sync
-            ThemeToggle.Checked += (s, e) => (DataContext as MainViewModel)?.ToggleStudyModeCommand?.Execute(true);
-            ThemeToggle.Unchecked += (s, e) => (DataContext as MainViewModel)?.ToggleStudyModeCommand?.Execute(false);
-
             // Accessibility: keyboard shortcut hint tooltip also set programmatically to ensure consistency
             ThemeToggle.ToolTip = "Toggle Study Mode (Ctrl+Shift+S)";
+
+            // Note: we rely on TwoWay binding between ThemeToggle.IsChecked and the ViewModel's IsStudyMode property
+            // so we don't add Checked/Unchecked handlers here to avoid feedback loops.
             // Initialize from settings
             var settings = new SettingsService();
             ApplyStudyMode(settings.Settings.StudyMode);
             _toastService.Muted = settings.Settings.DoNotDisturb;
 
-            // Update ThemeToggle visual (if changed externally)
-            ThemeToggle.IsChecked = settings.Settings.StudyMode;
+            // ThemeToggle is bound TwoWay to the ViewModel's IsStudyMode and will update via binding
 
             // Keep the ToggleCart label in sync with visibility
             ToggleCart.Click += (s, e) =>
@@ -139,9 +137,6 @@ namespace CoffeeShopKiosk
                 Application.Current.Resources["ProductCardHoverStyle"] = Application.Current.Resources["ProductCardHoverStyle"];
             }
 
-            // Update toggle visual state
-            ThemeToggle.IsChecked = enabled;
-            
             // Reduce other motion globally if desired (not implemented fully: placeholder)
         }
 
