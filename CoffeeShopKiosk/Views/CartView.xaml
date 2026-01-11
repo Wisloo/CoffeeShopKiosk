@@ -20,9 +20,14 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <Border Width="56" Height="56" CornerRadius="28" Background="White" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <Image Source="{Binding Product.ImageUrl}" Height="48" Width="48" Stretch="UniformToFill" />
-                            </Border>
+                            <Grid Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Ellipse Width="56" Height="56" Fill="White" />
+                                <Ellipse Width="50" Height="50" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Ellipse.Fill>
+                                        <ImageBrush ImageSource="{Binding Product.ImageUrl}" Stretch="UniformToFill" AlignmentX="Center" AlignmentY="Center" />
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                            </Grid>
 
                             <StackPanel Grid.Column="1" Margin="10,0">
                                 <TextBlock Text="{Binding Product.Name}" FontWeight="SemiBold" Foreground="{StaticResource MutedText}" />

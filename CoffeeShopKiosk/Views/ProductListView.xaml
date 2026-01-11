@@ -22,9 +22,14 @@
                         <DataTemplate>
                             <Border Style="{StaticResource CardStyle}">
                                 <StackPanel Width="260" Height="360" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <Border Width="150" Height="150" CornerRadius="80" Background="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,8" >
-                                        <Image Source="{Binding ImageUrl}" Height="130" Width="130" Margin="0" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" ImageFailed="Image_ImageFailed" />
-                                    </Border>
+                                    <Grid Width="150" Height="150" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,8">
+                                        <Ellipse Width="150" Height="150" Fill="White" />
+                                        <Ellipse Width="130" Height="130" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Ellipse.Fill>
+                                                <ImageBrush ImageSource="{Binding ImageUrl}" Stretch="UniformToFill" AlignmentX="Center" AlignmentY="Center" />
+                                            </Ellipse.Fill>
+                                        </Ellipse>
+                                    </Grid>
 
                                     <TextBlock Text="{Binding Name}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource MutedText}" Margin="0,8,0,2" HorizontalAlignment="Center" />
                                     <TextBlock Text="{Binding Description}" FontSize="13" Foreground="#7B4F2A" TextWrapping="Wrap" Margin="10,0,10,6" TextAlignment="Center" />
