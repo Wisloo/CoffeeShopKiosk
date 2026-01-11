@@ -5,8 +5,8 @@
     xmlns:app="clr-namespace:CoffeeShopKiosk"
     Title="Coffee Shop Kiosk" WindowState="Maximized" WindowStyle="SingleBorderWindow" ResizeMode="CanResize">
     <Window.InputBindings>
-        <!-- Use a routed command defined on this Window so we don't rely on binding to a non-dependency property -->
-        <KeyBinding Key="S" Modifiers="Control,Shift" Command="{x:Static app:MainWindow.ToggleStudyModeRoutedCommand}" />
+        <!-- Use a routed command defined on this Window; use a KeyGesture string to avoid ModifierKeys parsing issues -->
+        <KeyBinding Command="{x:Static app:MainWindow.ToggleStudyModeRoutedCommand}" Gesture="Ctrl+Shift+S" />
     </Window.InputBindings>    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="100"/>
