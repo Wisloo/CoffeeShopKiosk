@@ -76,6 +76,27 @@
                 </Style.Triggers>
             </Style>
 
+            <!-- Button style: touch friendly -->
+            <Style TargetType="Button" x:Key="PrimaryButton">
+                <Setter Property="Background" Value="{StaticResource CoffeeBrown}" />
+                <Setter Property="Foreground" Value="{StaticResource Cream}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Padding" Value="12,8" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Height" Value="44" />
+                <Setter Property="MinWidth" Value="100" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
             <!-- Add button press animation -->
             <Style TargetType="Button" x:Key="AddButtonAnimated" BasedOn="{StaticResource PrimaryButton}">
                 <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
@@ -113,26 +134,7 @@
                 <Setter Property="Opacity" Value="0.98" />
             </Style>
 
-            <!-- Button style: touch friendly -->
-            <Style TargetType="Button" x:Key="PrimaryButton">
-                <Setter Property="Background" Value="{StaticResource CoffeeBrown}" />
-                <Setter Property="Foreground" Value="{StaticResource Cream}" />
-                <Setter Property="FontWeight" Value="SemiBold" />
-                <Setter Property="Padding" Value="12,8" />
-                <Setter Property="Cursor" Value="Hand" />
-                <Setter Property="BorderThickness" Value="0" />
-                <Setter Property="Height" Value="44" />
-                <Setter Property="MinWidth" Value="100" />
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
+            <!-- PrimaryButton moved above to resolve resource lookup order -->
 
             <Style TargetType="Button" x:Key="SecondaryButton">
                 <Setter Property="Background" Value="Transparent" />
