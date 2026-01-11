@@ -1,4 +1,6 @@
+
 using System.Windows;
+using CoffeeShopKiosk.ViewModels;
 
 namespace CoffeeShopKiosk
 {

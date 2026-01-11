@@ -27,7 +27,7 @@ namespace CoffeeShopKiosk.ViewModels
 
         private void LoadProducts()
         {
-            Products = new ObservableCollection<ProductModel>(_productService.GetProducts());
+            Products = new ObservableCollection<ProductModel>(_productService.GetAllProducts());
         }
 
         private void PurchaseProduct(ProductModel product)
