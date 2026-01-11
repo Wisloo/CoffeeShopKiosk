@@ -21,6 +21,17 @@ namespace CoffeeShopKiosk
             var vm = new MainViewModel();
             DataContext = vm;
 
+            // Listen for ViewModel changes so UI can react when Study Mode is toggled via keyboard shortcut or other means
+            vm.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(vm.IsStudyMode))
+                {
+                    // Apply the theme and show a small toast for discoverability
+                    ApplyStudyMode(vm.IsStudyMode);
+                    _toastService.Show(vm.IsStudyMode ? "Study Mode enabled" : "Study Mode disabled");
+                }
+            };
+
             // Register command binding for the routed ToggleStudyMode command
             CommandBindings.Add(new CommandBinding(ToggleStudyModeRoutedCommand, ToggleStudyMode_Executed));
 
@@ -57,9 +68,9 @@ namespace CoffeeShopKiosk
                 }
             };
 
-            // Theme toggle - simple inversion between two palettes
-            ThemeToggle.Checked += (s, e) => ApplyStudyMode(true);
-            ThemeToggle.Unchecked += (s, e) => ApplyStudyMode(false);
+            // Theme toggle - route through the ViewModel so both sides stay in sync
+            ThemeToggle.Checked += (s, e) => (DataContext as MainViewModel)?.ToggleStudyModeCommand?.Execute(true);
+            ThemeToggle.Unchecked += (s, e) => (DataContext as MainViewModel)?.ToggleStudyModeCommand?.Execute(false);
 
             // Initialize from settings
             var settings = new SettingsService();
@@ -68,6 +79,21 @@ namespace CoffeeShopKiosk
 
             // Update ThemeToggle visual (if changed externally)
             ThemeToggle.IsChecked = settings.Settings.StudyMode;
+
+            // Keep the ToggleCart label in sync with visibility
+            ToggleCart.Click += (s, e) =>
+            {
+                if (CartPanel.Visibility == System.Windows.Visibility.Visible)
+                {
+                    CartPanel.Visibility = System.Windows.Visibility.Collapsed;
+                    ToggleCart.Content = "Show Cart";
+                }
+                else
+                {
+                    CartPanel.Visibility = System.Windows.Visibility.Visible;
+                    ToggleCart.Content = "Hide Cart";
+                }
+            };
         }
 
         private void ApplyStudyTheme(bool study)

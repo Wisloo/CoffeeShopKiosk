@@ -26,7 +26,7 @@
         </Grid.Background>
 
         <!-- Coffee-themed header -->
-        <Border Grid.Row="0" Grid.ColumnSpan="2" Background="#4B2E19" CornerRadius="0,0,32,32" Height="100" VerticalAlignment="Top" Effect="{DynamicResource DropShadowEffect}">
+        <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{StaticResource CoffeeBrown}" CornerRadius="0,0,32,32" Height="100" VerticalAlignment="Top" Effect="{DynamicResource DropShadowEffect}">
             <DockPanel LastChildFill="True">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="30,0,0,0">
                     <!-- Bigger coffee cup mark -->
@@ -45,8 +45,13 @@
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,24,0">
-                    <ToggleButton x:Name="ThemeToggle" Content="Study Mode" Width="110" Height="34" Margin="0,0,10,0"/>
-                    <Button x:Name="ToggleCart" Content="Hide Cart" Width="100" Height="34" />
+                    <ToggleButton x:Name="ThemeToggle" Width="150" Height="34" Margin="0,0,10,0" Style="{StaticResource PrimaryToggleButton}">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="Study Mode" Margin="0,0,8,0" />
+                            <TextBlock Text="Ctrl+Shift+S" FontSize="12" Opacity="0.7" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </ToggleButton>
+                    <Button x:Name="ToggleCart" Content="Hide Cart" Width="100" Height="34" Style="{StaticResource SecondaryButton}" />
                 </StackPanel>
             </DockPanel>
         </Border>

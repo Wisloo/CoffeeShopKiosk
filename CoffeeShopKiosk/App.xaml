@@ -135,6 +135,17 @@
                 </Style.Triggers>
             </Style>
 
+            <!-- ToggleButton variant for header actions based on PrimaryButton -->
+            <Style TargetType="ToggleButton" x:Key="PrimaryToggleButton" BasedOn="{StaticResource PrimaryButton}">
+                <Setter Property="Height" Value="34" />
+                <Setter Property="MinWidth" Value="120" />
+                <Style.Triggers>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter Property="Background" Value="#2B1A12" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
             <!-- Toast style -->
             <Style TargetType="Border" x:Key="ToastStyle">
                 <Setter Property="Background" Value="#3A2A1F" />
