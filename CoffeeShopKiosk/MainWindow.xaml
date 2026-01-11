@@ -25,14 +25,24 @@
         <Border Grid.Row="0" Grid.ColumnSpan="2" Background="#4B2E19" CornerRadius="0,0,32,32" Height="100" VerticalAlignment="Top" Effect="{DynamicResource DropShadowEffect}">
             <DockPanel LastChildFill="True">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="30,0,0,0">
-                    <!-- Coffee cup icon (SVG Path) -->
-                    <Viewbox Height="48" Width="48" Margin="0,0,16,0">
+                    <!-- Bigger coffee cup mark -->
+                    <Viewbox Height="58" Width="58" Margin="0,0,18,0">
                         <Canvas Width="48" Height="48">
                             <Path Data="M12,40 Q24,48 36,40 Q36,24 24,24 Q12,24 12,40 Z M24,24 Q24,12 36,12 Q36,24 24,24 Z" Fill="#FFF8F0" Stroke="#C7A17A" StrokeThickness="2"/>
                             <Ellipse Canvas.Left="18" Canvas.Top="8" Width="12" Height="8" Fill="#C7A17A" Opacity="0.7"/>
                         </Canvas>
                     </Viewbox>
-                    <TextBlock Text="Welcome to the Coffee Shop!" FontSize="28" FontWeight="Bold" Foreground="#FFF8F0" VerticalAlignment="Center"/>
+
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Coffee Shop Kiosk" Style="{StaticResource Heading1}" Foreground="{StaticResource Cream}"/>
+                        <TextBlock Text="A friendly cafe interface for students" Style="{StaticResource SubHeading}" Foreground="{StaticResource Cream}" Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,24,0">
+                    <ToggleButton x:Name="ThemeToggle" Content="Study Mode" Width="110" Height="34" Margin="0,0,10,0"/>
+                    <Button x:Name="ToggleCart" Content="Hide Cart" Width="100" Height="34" />
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -41,7 +51,10 @@
         <local:ProductListView Grid.Row="1" Grid.Column="0" Margin="24,24,8,24" />
 
         <!-- Cart side panel -->
-        <local:CartView Grid.Row="1" Grid.Column="1" DataContext="{Binding Cart}" Margin="8,24,24,24" />
+        <local:CartView Grid.Row="1" Grid.Column="1" x:Name="CartPanel" DataContext="{Binding Cart}" Margin="8,24,24,24" />
+
+        <!-- Toast host (non-blocking notifications) -->
+        <local:ToastHost Grid.Row="0" Grid.Column="1" x:Name="ToastHost" />
 
         <Grid.Resources>
             <DropShadowEffect x:Key="DropShadowEffect" Color="#000" BlurRadius="16" ShadowDepth="2" Opacity="0.18" />

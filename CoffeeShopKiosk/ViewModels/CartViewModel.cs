@@ -42,6 +42,8 @@ namespace CoffeeShopKiosk.ViewModels
             OnPropertyChanged(nameof(TotalItems));
         }
 
+        public event Action<ProductModel> ItemAdded;
+
         public void AddToCart(ProductModel product)
         {
             if (product == null) return;
@@ -58,6 +60,8 @@ namespace CoffeeShopKiosk.ViewModels
                 OnPropertyChanged(nameof(TotalAmount));
                 OnPropertyChanged(nameof(TotalItems));
             }
+
+            ItemAdded?.Invoke(product);
         }
 
         private void IncreaseQuantity(CartItem item)
