@@ -3,6 +3,7 @@ using System.Windows;
 using CoffeeShopKiosk.ViewModels;
 using System.Windows.Media;
 using CoffeeShopKiosk.Services;
+using System.Windows.Input;
 
 namespace CoffeeShopKiosk
 {
@@ -10,11 +11,18 @@ namespace CoffeeShopKiosk
     {
         private Services.ToastService _toastService;
 
+        // Routed command used by the Window to toggle Study Mode. Using a routed command avoids trying to bind
+        // a Binding to the KeyBinding.Command property (which is not a dependency property and causes parse-time errors).
+        public static readonly RoutedCommand ToggleStudyModeRoutedCommand = new RoutedCommand();
+
         public MainWindow()
         {
             InitializeComponent();
             var vm = new MainViewModel();
             DataContext = vm;
+
+            // Register command binding for the routed ToggleStudyMode command
+            CommandBindings.Add(new CommandBinding(ToggleStudyModeRoutedCommand, ToggleStudyMode_Executed));
 
             // Wire up toast service to UI
             _toastService = new ToastService();
@@ -107,6 +115,15 @@ namespace CoffeeShopKiosk
             ThemeToggle.IsChecked = enabled;
             
             // Reduce other motion globally if desired (not implemented fully: placeholder)
+        }
+
+        private void ToggleStudyMode_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                // Invoke the viewmodel command to toggle Study Mode
+                vm.ToggleStudyModeCommand?.Execute(null);
+            }
         }
     }
 }

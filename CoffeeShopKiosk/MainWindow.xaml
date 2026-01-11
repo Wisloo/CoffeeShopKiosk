@@ -1,10 +1,12 @@
 <Window x:Class="CoffeeShopKiosk.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:CoffeeShopKiosk.Views"
+    xmlns:views="clr-namespace:CoffeeShopKiosk.Views"
+    xmlns:app="clr-namespace:CoffeeShopKiosk"
     Title="Coffee Shop Kiosk" WindowState="Maximized" WindowStyle="SingleBorderWindow" ResizeMode="CanResize">
     <Window.InputBindings>
-        <KeyBinding Key="S" Modifiers="Control, Shift" Command="{Binding ToggleStudyModeCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
+        <!-- Use a routed command defined on this Window so we don't rely on binding to a non-dependency property -->
+        <KeyBinding Key="S" Modifiers="Control,Shift" Command="{x:Static app:MainWindow.ToggleStudyModeRoutedCommand}" />
     </Window.InputBindings>    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="100"/>
@@ -50,13 +52,13 @@
         </Border>
 
         <!-- Main product list -->
-        <local:ProductListView Grid.Row="1" Grid.Column="0" Margin="24,24,8,24" />
+        <views:ProductListView Grid.Row="1" Grid.Column="0" Margin="24,24,8,24" />
 
         <!-- Cart side panel -->
-        <local:CartView Grid.Row="1" Grid.Column="1" x:Name="CartPanel" DataContext="{Binding Cart}" Margin="8,24,24,24" />
+        <views:CartView Grid.Row="1" Grid.Column="1" x:Name="CartPanel" DataContext="{Binding Cart}" Margin="8,24,24,24" />
 
         <!-- Toast host (non-blocking notifications) -->
-        <local:ToastHost Grid.Row="0" Grid.Column="1" x:Name="ToastHost" />
+        <views:ToastHost Grid.Row="0" Grid.Column="1" x:Name="ToastHost" />
 
         <Grid.Resources>
             <DropShadowEffect x:Key="DropShadowEffect" Color="#000" BlurRadius="16" ShadowDepth="2" Opacity="0.18" />
