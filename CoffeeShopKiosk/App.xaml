@@ -1,0 +1,14 @@
+<Application x:Class="CoffeeShopKiosk.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:CoffeeShopKiosk"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Add any merged resource dictionaries here -->
+            </ResourceDictionary.MergedDictionaries>
+            <!-- Define application-level styles and resources here -->
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
