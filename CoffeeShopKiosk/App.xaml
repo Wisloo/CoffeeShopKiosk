@@ -8,7 +8,75 @@
             <ResourceDictionary.MergedDictionaries>
                 <!-- Add any merged resource dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
-            <!-- Define application-level styles and resources here -->
+
+            <!-- Cafe-inspired color palette -->
+            <Color x:Key="CoffeeBrownColor">#4B2E19</Color>
+            <Color x:Key="CreamColor">#FFF8F0</Color>
+            <Color x:Key="CardColor">#FFF6EE</Color>
+            <Color x:Key="AccentGreenColor">#27ae60</Color>
+            <Color x:Key="MutedTextColor">#5A3E2E</Color>
+
+            <SolidColorBrush x:Key="CoffeeBrown" Color="{StaticResource CoffeeBrownColor}" />
+            <SolidColorBrush x:Key="Cream" Color="{StaticResource CreamColor}" />
+            <SolidColorBrush x:Key="CardBackground" Color="{StaticResource CardColor}" />
+            <SolidColorBrush x:Key="AccentGreen" Color="{StaticResource AccentGreenColor}" />
+            <SolidColorBrush x:Key="MutedText" Color="{StaticResource MutedTextColor}" />
+
+            <!-- Global typography -->
+            <FontFamily x:Key="AppFont">Segoe UI</FontFamily>
+
+            <!-- Button style: touch friendly -->
+            <Style TargetType="Button" x:Key="PrimaryButton">
+                <Setter Property="Background" Value="{StaticResource CoffeeBrown}" />
+                <Setter Property="Foreground" Value="{StaticResource Cream}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Padding" Value="12,8" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Height" Value="44" />
+                <Setter Property="MinWidth" Value="100" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style TargetType="Button" x:Key="SecondaryButton">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="{StaticResource CoffeeBrown}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Foreground" Value="{StaticResource CoffeeBrown}" />
+                <Setter Property="Padding" Value="10,6" />
+                <Setter Property="Height" Value="36" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="8" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Card style -->
+            <Style x:Key="CardStyle" TargetType="Border">
+                <Setter Property="CornerRadius" Value="14" />
+                <Setter Property="Background" Value="{StaticResource CardBackground}" />
+                <Setter Property="Padding" Value="16" />
+                <Setter Property="Margin" Value="12" />
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="#000" BlurRadius="12" ShadowDepth="3" Opacity="0.12" />
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

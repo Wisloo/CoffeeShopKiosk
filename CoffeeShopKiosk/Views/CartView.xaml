@@ -1,40 +1,59 @@
 <UserControl x:Class="CoffeeShopKiosk.Views.CartView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Border Background="#FFF" CornerRadius="12" Padding="12" Margin="12" Width="320">
+    <Border Style="{StaticResource CardStyle}" Width="320">
         <StackPanel>
-            <TextBlock Text="Cart" FontSize="20" FontWeight="Bold" Margin="0,0,0,10" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                <TextBlock Text="Cart" FontSize="20" FontWeight="Bold" Foreground="{StaticResource MutedText}" />
+                <Border Background="{StaticResource CoffeeBrown}" CornerRadius="12" Padding="6" Margin="8,0,0,0" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding TotalItems}" Foreground="{StaticResource Cream}" FontWeight="Bold"/>
+                </Border>
+            </StackPanel>
 
-            <ListBox ItemsSource="{Binding Items}" BorderThickness="0" Height="360">
+            <ListBox ItemsSource="{Binding Items}" BorderThickness="0" Height="380" Margin="0,10,0,0">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="0,4">
+                        <Grid Margin="0,8">
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="{Binding Product.Name}" FontWeight="SemiBold" />
-                                <TextBlock Text="{Binding Product.Price, StringFormat='{}{0:C}'}" Foreground="#27ae60" />
-                                <TextBlock Text="{Binding Quantity, StringFormat='Qty: {0}'}" FontSize="12" Foreground="#666" />
+
+                            <Border Width="56" Height="56" CornerRadius="28" Background="White" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Image Source="{Binding Product.ImageUrl}" Height="48" Width="48" Stretch="UniformToFill" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Margin="10,0">
+                                <TextBlock Text="{Binding Product.Name}" FontWeight="SemiBold" Foreground="{StaticResource MutedText}" />
+                                <TextBlock Text="{Binding Product.Price, StringFormat='{}{0:C}'}" FontSize="13" Foreground="{StaticResource AccentGreen}" />
                             </StackPanel>
-                            <StackPanel Grid.Column="1" HorizontalAlignment="Right">
-                                <TextBlock Text="{Binding LineTotal, StringFormat='{}{0:C}'}" HorizontalAlignment="Right" />
-                                <Button Content="Remove" Command="{Binding DataContext.RemoveItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="0,6,0,0" />
+
+                            <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Style="{StaticResource SecondaryButton}" Content="-" Command="{Binding DataContext.DecreaseQuantityCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="0,0,6,0" />
+                                    <TextBlock Text="{Binding Quantity}" Width="28" TextAlignment="Center" VerticalAlignment="Center" />
+                                    <Button Style="{StaticResource SecondaryButton}" Content="+" Command="{Binding DataContext.IncreaseQuantityCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="6,0,0,0" />
+                                </StackPanel>
+
+                                <TextBlock Text="{Binding LineTotal, StringFormat='{}{0:C}'}" HorizontalAlignment="Right" Margin="0,6,0,0" />
+                                <Button Content="Remove" Command="{Binding DataContext.RemoveItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Style="{StaticResource SecondaryButton}" Margin="0,6,0,0" />
                             </StackPanel>
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <Separator Margin="0,8" />
+            <Separator Margin="0,6" />
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <TextBlock Text="Total: " FontWeight="Bold" VerticalAlignment="Center" />
-                <TextBlock Text="{Binding TotalAmount, StringFormat='{}{0:C}'}" FontWeight="Bold" Margin="6,0,0,0" VerticalAlignment="Center" />
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="SpaceBetween" VerticalAlignment="Center" Margin="0,4">
+                    <TextBlock Text="Subtotal" FontSize="14" Foreground="{StaticResource MutedText}" />
+                    <TextBlock Text="{Binding TotalAmount, StringFormat='{}{0:C}'}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource MutedText}" />
+                </StackPanel>
+
+                <Button Content="Checkout" Command="{Binding CheckoutCommand}" Style="{StaticResource PrimaryButton}" Margin="0,12,0,0" />
             </StackPanel>
-
-            <Button Content="Checkout" Command="{Binding CheckoutCommand}" Margin="0,12,0,0" Background="#4CAF50" Foreground="White" Height="36"/>
         </StackPanel>
     </Border>
 </UserControl>

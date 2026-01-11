@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using System.Collections.Specialized;
 using CoffeeShopKiosk.Models;
 using CoffeeShopKiosk.Services;
 
@@ -15,8 +16,12 @@ namespace CoffeeShopKiosk.ViewModels
 
         public decimal TotalAmount => Items.Sum(i => i.LineTotal);
 
+        public int TotalItems => Items.Sum(i => i.Quantity);
+
         public ICommand RemoveItemCommand { get; }
         public ICommand CheckoutCommand { get; }
+        public ICommand IncreaseQuantityCommand { get; }
+        public ICommand DecreaseQuantityCommand { get; }
 
         public event Action<OrderModel> OrderPlaced;
 
@@ -25,6 +30,16 @@ namespace CoffeeShopKiosk.ViewModels
             _orderService = orderService;
             RemoveItemCommand = new RelayCommand<CartItem>(RemoveItem);
             CheckoutCommand = new RelayCommand<object>(o => Checkout(), o => Items.Any());
+            IncreaseQuantityCommand = new RelayCommand<CartItem>(IncreaseQuantity);
+            DecreaseQuantityCommand = new RelayCommand<CartItem>(DecreaseQuantity);
+
+            Items.CollectionChanged += Items_CollectionChanged;
+        }
+
+        private void Items_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(TotalAmount));
+            OnPropertyChanged(nameof(TotalItems));
         }
 
         public void AddToCart(ProductModel product)
@@ -35,12 +50,38 @@ namespace CoffeeShopKiosk.ViewModels
             {
                 existing.Quantity++;
                 OnPropertyChanged(nameof(TotalAmount));
+                OnPropertyChanged(nameof(TotalItems));
             }
             else
             {
                 Items.Add(new CartItem { Product = product, Quantity = 1 });
                 OnPropertyChanged(nameof(TotalAmount));
+                OnPropertyChanged(nameof(TotalItems));
             }
+        }
+
+        private void IncreaseQuantity(CartItem item)
+        {
+            if (item == null) return;
+            item.Quantity++;
+            OnPropertyChanged(nameof(TotalAmount));
+            OnPropertyChanged(nameof(TotalItems));
+        }
+
+        private void DecreaseQuantity(CartItem item)
+        {
+            if (item == null) return;
+            if (item.Quantity > 1)
+            {
+                item.Quantity--;
+            }
+            else
+            {
+                Items.Remove(item);
+            }
+
+            OnPropertyChanged(nameof(TotalAmount));
+            OnPropertyChanged(nameof(TotalItems));
         }
 
         private void RemoveItem(CartItem item)
@@ -48,6 +89,7 @@ namespace CoffeeShopKiosk.ViewModels
             if (item == null) return;
             Items.Remove(item);
             OnPropertyChanged(nameof(TotalAmount));
+            OnPropertyChanged(nameof(TotalItems));
         }
 
         public void Checkout()
@@ -62,6 +104,7 @@ namespace CoffeeShopKiosk.ViewModels
             OrderPlaced?.Invoke(order);
             Items.Clear();
             OnPropertyChanged(nameof(TotalAmount));
+            OnPropertyChanged(nameof(TotalItems));
         }
     }
 }
