@@ -21,6 +21,10 @@ namespace CoffeeShopKiosk
             var vm = new MainViewModel();
             DataContext = vm;
 
+            // Wire up toast service to UI first so the VM change handler can safely show toasts
+            _toastService = new ToastService();
+            ToastHost.DataContext = _toastService;
+
             // Listen for ViewModel changes so UI can react when Study Mode is toggled via keyboard shortcut or other means
             vm.PropertyChanged += (s, e) =>
             {
@@ -28,16 +32,12 @@ namespace CoffeeShopKiosk
                 {
                     // Apply the theme and show a small toast for discoverability
                     ApplyStudyMode(vm.IsStudyMode);
-                    _toastService.Show(vm.IsStudyMode ? "Study Mode enabled" : "Study Mode disabled");
+                    _toastService?.Show(vm.IsStudyMode ? "Study Mode enabled" : "Study Mode disabled");
                 }
             };
 
             // Register command binding for the routed ToggleStudyMode command
             CommandBindings.Add(new CommandBinding(ToggleStudyModeRoutedCommand, ToggleStudyMode_Executed));
-
-            // Wire up toast service to UI
-            _toastService = new ToastService();
-            ToastHost.DataContext = _toastService;
 
             // Show a toast when an item is added to cart
             vm.Cart.ItemAdded += product =>
@@ -72,6 +72,8 @@ namespace CoffeeShopKiosk
             ThemeToggle.Checked += (s, e) => (DataContext as MainViewModel)?.ToggleStudyModeCommand?.Execute(true);
             ThemeToggle.Unchecked += (s, e) => (DataContext as MainViewModel)?.ToggleStudyModeCommand?.Execute(false);
 
+            // Accessibility: keyboard shortcut hint tooltip also set programmatically to ensure consistency
+            ThemeToggle.ToolTip = "Toggle Study Mode (Ctrl+Shift+S)";
             // Initialize from settings
             var settings = new SettingsService();
             ApplyStudyMode(settings.Settings.StudyMode);

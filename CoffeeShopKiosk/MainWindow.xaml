@@ -27,7 +27,11 @@
 
         <!-- Coffee-themed header -->
         <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{StaticResource CoffeeBrown}" CornerRadius="0,0,32,32" Height="100" VerticalAlignment="Top" Effect="{DynamicResource DropShadowEffect}">
-            <DockPanel LastChildFill="True">
+            <DockPanel LastChildFill="False">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,24,0">
+                    <!-- Header actions will be here (swapped earlier so right-docked content doesn't become the last-child fill) -->
+                </StackPanel>
+
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="30,0,0,0">
                     <!-- Bigger coffee cup mark -->
                     <Viewbox Height="58" Width="58" Margin="0,0,18,0">
@@ -44,8 +48,8 @@
 
                 </StackPanel>
 
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,24,0">
-                    <ToggleButton x:Name="ThemeToggle" Width="150" Height="34" Margin="0,0,10,0" Style="{StaticResource PrimaryToggleButton}">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,24,0" HorizontalAlignment="Right">
+                    <ToggleButton x:Name="ThemeToggle" Width="220" Height="34" Margin="0,0,10,0" Style="{StaticResource PrimaryToggleButton}" ToolTip="Toggle Study Mode (Ctrl+Shift+S)" IsChecked="{Binding IsStudyMode, Mode=TwoWay}" AutomationProperties.Name="Toggle Study Mode">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <TextBlock Text="Study Mode" Margin="0,0,8,0" />
                             <TextBlock Text="Ctrl+Shift+S" FontSize="12" Opacity="0.7" VerticalAlignment="Center" />

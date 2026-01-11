@@ -31,19 +31,38 @@ namespace CoffeeShopKiosk.ViewModels
             LoadProducts();
 
             AddToOrderCommand = new RelayCommand<ProductModel>(p => Cart.AddToCart(p));
-            ToggleStudyModeCommand = new RelayCommand<object>(_ => ToggleStudyMode());
+            // Accept an optional parameter (bool) to explicitly set Study Mode; otherwise toggle
+            ToggleStudyModeCommand = new RelayCommand<object>(p => ToggleStudyMode(p));
         }
 
         private void LoadProducts()
         {
             Products = new ObservableCollection<ProductModel>(_productService.GetAllProducts());
         }
-        private void ToggleStudyMode()
+        private void ToggleStudyMode(object parameter)
         {
-            var current = _settingsService.Settings.StudyMode;
-            _settingsService.Update(s => s.StudyMode = !current);
+            if (parameter is bool explicitValue)
+            {
+                _settingsService.Update(s => s.StudyMode = explicitValue);
+            }
+            else
+            {
+                var current = _settingsService.Settings.StudyMode;
+                _settingsService.Update(s => s.StudyMode = !current);
+            }
+
+            // Raise property changed so views can react
             OnPropertyChanged(nameof(IsStudyMode));
         }
 
-        public bool IsStudyMode => _settingsService.Settings.StudyMode;    }
+        public bool IsStudyMode
+        {
+            get => _settingsService.Settings.StudyMode;
+            set
+            {
+                _settingsService.Update(s => s.StudyMode = value);
+                OnPropertyChanged();
+            }
+        }
+    }
 }

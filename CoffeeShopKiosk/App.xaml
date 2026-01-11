@@ -135,13 +135,29 @@
                 </Style.Triggers>
             </Style>
 
-            <!-- ToggleButton variant for header actions based on PrimaryButton -->
-            <Style TargetType="ToggleButton" x:Key="PrimaryToggleButton" BasedOn="{StaticResource PrimaryButton}">
+            <!-- ToggleButton variant for header actions (self-contained to avoid TargetType mismatch) -->
+            <Style TargetType="ToggleButton" x:Key="PrimaryToggleButton">
+                <Setter Property="Background" Value="{StaticResource CoffeeBrown}" />
+                <Setter Property="Foreground" Value="{StaticResource Cream}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Padding" Value="10,6" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="BorderThickness" Value="0" />
                 <Setter Property="Height" Value="34" />
                 <Setter Property="MinWidth" Value="120" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
                 <Style.Triggers>
                     <Trigger Property="IsChecked" Value="True">
                         <Setter Property="Background" Value="#2B1A12" />
+                        <Setter Property="Foreground" Value="{StaticResource Cream}" />
                     </Trigger>
                 </Style.Triggers>
             </Style>
