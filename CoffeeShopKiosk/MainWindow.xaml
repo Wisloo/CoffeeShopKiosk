@@ -26,7 +26,7 @@
         </Grid.Background>
 
         <!-- Coffee-themed header -->
-        <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{StaticResource CoffeeBrown}" CornerRadius="0,0,32,32" Height="100" VerticalAlignment="Top" Effect="{DynamicResource DropShadowEffect}">
+        <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{DynamicResource CoffeeBrown}" CornerRadius="0,0,32,32" Height="100" VerticalAlignment="Top" Effect="{DynamicResource DropShadowEffect}">
             <DockPanel LastChildFill="False">
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,24,0">
                     <!-- Header actions will be here (swapped earlier so right-docked content doesn't become the last-child fill) -->
@@ -42,19 +42,22 @@
                     </Viewbox>
 
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Coffee Shop Kiosk" Style="{StaticResource Heading1}" Foreground="{StaticResource Cream}"/>
-                        <TextBlock Text="A friendly cafe interface for students" Style="{StaticResource SubHeading}" Foreground="{StaticResource Cream}" Margin="0,4,0,0"/>
+                        <TextBlock Text="Coffee Shop Kiosk" Style="{StaticResource Heading1}" Foreground="{DynamicResource Cream}"/>
+                        <TextBlock Text="A friendly cafe interface for students" Style="{StaticResource SubHeading}" Foreground="{DynamicResource Cream}" Margin="0,4,0,0"/>
                     </StackPanel>
 
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,24,0" HorizontalAlignment="Right">
-                    <ToggleButton x:Name="ThemeToggle" Width="220" Height="34" Margin="0,0,10,0" Style="{StaticResource PrimaryToggleButton}" ToolTip="Toggle Study Mode (Ctrl+Shift+S)" IsChecked="{Binding IsStudyMode, Mode=TwoWay}" AutomationProperties.Name="Toggle Study Mode">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="Study Mode" Margin="0,0,8,0" />
-                            <TextBlock Text="Ctrl+Shift+S" FontSize="12" Opacity="0.7" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </ToggleButton>
+                    <StackPanel Orientation="Horizontal">
+                        <ToggleButton x:Name="ThemeToggle" Width="220" Height="34" Margin="0,0,10,0" Style="{StaticResource PrimaryToggleButton}" ToolTip="Toggle Study Mode (Ctrl+Shift+S)" IsChecked="{Binding IsStudyMode, Mode=TwoWay}" AutomationProperties.Name="Toggle Study Mode">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Text="Study Mode" Margin="0,0,8,0" />
+                                <TextBlock Text="Ctrl+Shift+S" FontSize="12" Opacity="0.7" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </ToggleButton>
+                        <Button x:Name="OpenStudySettings" Content="⚙" Width="36" Height="34" Style="{StaticResource SecondaryButton}" ToolTip="Study Settings" />
+                    </StackPanel>
                     <Button x:Name="ToggleCart" Content="Hide Cart" Width="100" Height="34" Style="{StaticResource SecondaryButton}" />
                 </StackPanel>
             </DockPanel>
@@ -63,11 +66,18 @@
         <!-- Main product list -->
         <views:ProductListView Grid.Row="1" Grid.Column="0" Margin="24,24,8,24" />
 
-        <!-- Cart side panel -->
-        <views:CartView Grid.Row="1" Grid.Column="1" x:Name="CartPanel" DataContext="{Binding Cart}" Margin="8,24,24,24" />
+        <!-- Cart side panel with Pomodoro -->
+        <StackPanel Grid.Row="1" Grid.Column="1" x:Name="CartPanel" Margin="8,24,24,24">
+            <views:CartView DataContext="{Binding Cart}" />
+            <views:PomodoroView DataContext="{Binding Pomodoro}" Margin="0,12,0,0" />
+            <views:AmbientSoundControl Margin="0,12,0,0" />
+        </StackPanel>
 
         <!-- Toast host (non-blocking notifications) -->
         <views:ToastHost Grid.Row="0" Grid.Column="1" x:Name="ToastHost" />
+
+        <!-- Spotlight overlay (covers content when Study Mode + SpotlightEnabled) -->
+        <views:SpotlightOverlay x:Name="SpotlightOverlay" Grid.RowSpan="2" Grid.ColumnSpan="2" />
 
         <Grid.Resources>
             <DropShadowEffect x:Key="DropShadowEffect" Color="#000" BlurRadius="16" ShadowDepth="2" Opacity="0.18" />

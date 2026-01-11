@@ -5,8 +5,8 @@
         <StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
                 <TextBlock Text="Cart" FontSize="20" FontWeight="Bold" Foreground="{StaticResource MutedText}" />
-                <Border Background="{StaticResource CoffeeBrown}" CornerRadius="12" Padding="6" Margin="8,0,0,0" HorizontalAlignment="Right">
-                    <TextBlock Text="{Binding TotalItems}" Foreground="{StaticResource Cream}" FontWeight="Bold"/>
+                <Border Background="{DynamicResource CoffeeBrown}" CornerRadius="12" Padding="6" Margin="8,0,0,0" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding TotalItems}" Foreground="{DynamicResource Cream}" FontWeight="Bold"/>
                 </Border>
             </StackPanel>
 

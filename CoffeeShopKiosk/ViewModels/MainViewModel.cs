@@ -17,6 +17,7 @@ namespace CoffeeShopKiosk.ViewModels
         }
 
         public CartViewModel Cart { get; }
+        public PomodoroViewModel Pomodoro { get; }
 
         public ICommand AddToOrderCommand { get; }
         public ICommand ToggleStudyModeCommand { get; }
@@ -27,6 +28,7 @@ namespace CoffeeShopKiosk.ViewModels
             _orderService = new OrderService();
             _settingsService = new SettingsService();
             Cart = new CartViewModel(_orderService);
+            Pomodoro = new PomodoroViewModel(_settingsService);
 
             LoadProducts();
 
@@ -63,6 +65,14 @@ namespace CoffeeShopKiosk.ViewModels
                 _settingsService.Update(s => s.StudyMode = value);
                 OnPropertyChanged();
             }
+        }
+
+        // Exposed for product list to hide images when Study Mode + setting is enabled
+        private bool _isHideProductImages;
+        public bool IsHideProductImages
+        {
+            get => _isHideProductImages;
+            set { _isHideProductImages = value; OnPropertyChanged(); }
         }
     }
 }

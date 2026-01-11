@@ -10,6 +10,9 @@ namespace CoffeeShopKiosk
     public partial class MainWindow : Window
     {
         private Services.ToastService _toastService;
+        private System.Windows.Style _originalProductCardHoverStyle;
+        private System.Windows.Style _originalAddButtonAnimatedStyle;
+        private bool _previousToastMuted;
 
         // Routed command used by the Window to toggle Study Mode. Using a routed command avoids trying to bind
         // a Binding to the KeyBinding.Command property (which is not a dependency property and causes parse-time errors).
@@ -25,6 +28,10 @@ namespace CoffeeShopKiosk
             _toastService = new ToastService();
             ToastHost.DataContext = _toastService;
 
+            // Cache original hover style so we can restore it when leaving Study Mode
+            _originalProductCardHoverStyle = Application.Current.Resources["ProductCardHoverStyle"] as Style;
+            _originalAddButtonAnimatedStyle = Application.Current.Resources["AddButtonAnimated"] as Style;
+
             // Listen for ViewModel changes so UI can react when Study Mode is toggled via keyboard shortcut or other means
             vm.PropertyChanged += (s, e) =>
             {
@@ -32,12 +39,65 @@ namespace CoffeeShopKiosk
                 {
                     // Apply the theme and show a small toast for discoverability
                     ApplyStudyMode(vm.IsStudyMode);
-                    _toastService?.Show(vm.IsStudyMode ? "Study Mode enabled" : "Study Mode disabled");
+
+                    // Spotlight & Image hiding based on settings
+                    var settings = new SettingsService();
+                    if (vm.IsStudyMode && settings.Settings.SpotlightEnabled)
+                    {
+                        SpotlightOverlay.Show(true, 0.54);
+                    }
+                    else
+                    {
+                        SpotlightOverlay.Show(false);
+                    }
+
+                    if (vm.IsStudyMode && settings.Settings.HideProductImages)
+                    {
+                        // Notify product list via ViewModel property
+                        vm.IsHideProductImages = true;
+                    }
+                    else
+                    {
+                        vm.IsHideProductImages = false;
+                    }
+
+                    // Auto DND: save previous toast muted state and mute while study mode is on
+                    if (vm.IsStudyMode)
+                    {
+                        _previousToastMuted = _toastService.Muted;
+                        _toastService.Muted = true; // mute while studying
+
+                        // Optionally auto-start Pomodoro when Study Mode is enabled (default true)
+                        if (settings.Settings.AutoStartPomodoroOnStudyMode)
+                        {
+                            vm.Pomodoro?.Start();
+                            _toastService?.Show("Pomodoro started");
+                        }
+                        // Optionally start ambient sound
+                        if (settings.Settings.AmbientSoundEnabled)
+                        {
+                            AmbientSoundService.Play(settings.Settings.AmbientSoundChoice, settings.Settings.AmbientSoundVolume);
+                        }
+                    }
+                    else
+                    {
+                        // Restore previous DND setting
+                        _toastService.Muted = _previousToastMuted;
+                        vm.Pomodoro?.Pause();
+                        AmbientSoundService.Stop();
+                        _toastService?.Show("Study Mode disabled");
+                    }
                 }
             };
 
             // Register command binding for the routed ToggleStudyMode command
             CommandBindings.Add(new CommandBinding(ToggleStudyModeRoutedCommand, ToggleStudyMode_Executed));
+
+            // Show a toast when Pomodoro period switches (work <-> break)
+            vm.Pomodoro.PeriodSwitched += isWork =>
+            {
+                _toastService?.Show(isWork ? "Work session started" : "Break started");
+            };
 
             // Show a toast when an item is added to cart
             vm.Cart.ItemAdded += product =>
@@ -70,6 +130,29 @@ namespace CoffeeShopKiosk
 
             // Accessibility: keyboard shortcut hint tooltip also set programmatically to ensure consistency
             ThemeToggle.ToolTip = "Toggle Study Mode (Ctrl+Shift+S)";
+            OpenStudySettings.Click += (s,e) =>
+            {
+                var dlg = new Views.StudySettings() { Owner = this };
+                var result = dlg.ShowDialog();
+                if (result == true)
+                {
+                    // After settings change, re-apply Study Mode side-effects if active
+                    var settings = new SettingsService();
+                    if (vm.IsStudyMode)
+                    {
+                        SpotlightOverlay.Show(settings.Settings.SpotlightEnabled, 0.54);
+                        vm.IsHideProductImages = settings.Settings.HideProductImages;
+                        if (settings.Settings.AmbientSoundEnabled)
+                        {
+                            AmbientSoundService.Play(settings.Settings.AmbientSoundChoice, settings.Settings.AmbientSoundVolume);
+                        }
+                        else
+                        {
+                            AmbientSoundService.Stop();
+                        }
+                    }
+                }
+            };
 
             // Note: we rely on TwoWay binding between ThemeToggle.IsChecked and the ViewModel's IsStudyMode property
             // so we don't add Checked/Unchecked handlers here to avoid feedback loops.
@@ -98,18 +181,12 @@ namespace CoffeeShopKiosk
 
         private void ApplyStudyTheme(bool study)
         {
-            if (study)
-            {
-                Resources["CoffeeBrownColor"] = (Color)ColorConverter.ConvertFromString("#2B1A12");
-                Resources["CreamColor"] = (Color)ColorConverter.ConvertFromString("#F5EFE9");
-                Resources["CardColor"] = (Color)ColorConverter.ConvertFromString("#F6EEE8");
-            }
-            else
-            {
-                Resources["CoffeeBrownColor"] = (Color)ColorConverter.ConvertFromString("#4B2E19");
-                Resources["CreamColor"] = (Color)ColorConverter.ConvertFromString("#FFF8F0");
-                Resources["CardColor"] = (Color)ColorConverter.ConvertFromString("#FFF6EE");
-            }
+            // Replace brushes with fresh SolidColorBrush instances so DynamicResource users update immediately.
+            var appRes = Application.Current.Resources;
+
+            appRes["CoffeeBrown"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(study ? "#2B1A12" : "#4B2E19"));
+            appRes["Cream"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(study ? "#F5EFE9" : "#FFF8F0"));
+            appRes["CardBackground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(study ? "#F6EEE8" : "#FFF6EE"));
         }
 
         private void ApplyStudyMode(bool enabled)
@@ -128,13 +205,23 @@ namespace CoffeeShopKiosk
             if (enabled)
             {
                 Application.Current.Resources["ProductCardHoverStyle"] = Application.Current.Resources["ProductCardHoverStyle_NoMotion"] as System.Windows.Style;
+                // disable add button animation as well when reducing motion
+                if (Application.Current.Resources["AddButtonAnimated_NoMotion"] is System.Windows.Style noMotion)
+                {
+                    Application.Current.Resources["AddButtonAnimated"] = noMotion;
+                }
             }
             else
             {
-                // restore original
-                // Re-define the animation style by reloading it from App.xaml resources
-                // (Assumes original style key ProductCardHoverStyle is defined in App resources)
-                Application.Current.Resources["ProductCardHoverStyle"] = Application.Current.Resources["ProductCardHoverStyle"];
+                // restore cached original style (so we don't lose the animated version)
+                if (_originalProductCardHoverStyle != null)
+                {
+                    Application.Current.Resources["ProductCardHoverStyle"] = _originalProductCardHoverStyle;
+                }
+                if (_originalAddButtonAnimatedStyle != null)
+                {
+                    Application.Current.Resources["AddButtonAnimated"] = _originalAddButtonAnimatedStyle;
+                }
             }
 
             // Reduce other motion globally if desired (not implemented fully: placeholder)
