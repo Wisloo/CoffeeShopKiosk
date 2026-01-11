@@ -6,4 +6,9 @@
     <AssemblyName>CoffeeShopKiosk</AssemblyName>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Include="CoffeeShopKiosk/Images/*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

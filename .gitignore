@@ -1,0 +1,37 @@
+# Ignore Visual Studio workspace and user files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignore build outputs
+**/bin/
+**/obj/
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# Database and caches
+*.db
+*.db-shm
+*.db-wal
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Ignore temporary files
+*.log
+*.tmp
+
+# Ignore compiled outputs
+*.dll
+*.exe
+*.pdb
+
+# Keep source image files (do not ignore)
+# (Images in project folders should be tracked if intentional)

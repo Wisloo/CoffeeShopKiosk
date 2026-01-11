@@ -23,6 +23,8 @@
                 </StackPanel>
             </DockPanel>
         </Border>
+        <!-- Minimal image test -->
+        <Image Source="pack://siteoforigin:,,,/CoffeeShopKiosk/Images/Espresso.jpg" Width="100" Height="100" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20"/>
         <local:ProductListView Grid.Row="1" />
         <Grid.Resources>
             <DropShadowEffect x:Key="DropShadowEffect" Color="#000" BlurRadius="16" ShadowDepth="2" Opacity="0.18" />

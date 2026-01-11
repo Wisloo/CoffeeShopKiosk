@@ -11,22 +11,22 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="0,40,0,0" HorizontalAlignment="Center" Width="1100">
                 <TextBlock Text="Coffee Products and Pastries" FontSize="36" FontWeight="Bold" Margin="0,0,0,20" Foreground="#2D1606" HorizontalAlignment="Center"/>
-                <TextBlock Text="{Binding Products.Count, StringFormat='Product count: {0}'}" FontSize="18" FontWeight="Normal" Margin="0,0,0,30" Foreground="#7B4F2A" HorizontalAlignment="Center"/>
+                <!-- Product count removed -->
                 <ItemsControl ItemsSource="{Binding Products}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel IsItemsHost="True" Orientation="Horizontal" HorizontalAlignment="Center" />
+                            <UniformGrid IsItemsHost="True" Columns="4" HorizontalAlignment="Center" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border CornerRadius="20" BorderBrush="#BFA37A" BorderThickness="2" Margin="30" Padding="24" Background="#FFF8F0" Effect="{DynamicResource DropShadowEffect}">
-                                <StackPanel Width="300" Height="340" VerticalAlignment="Center">
-                                    <Image Source="{Binding ImageUrl}" Height="140" Width="140" Margin="0,0,0,12" Stretch="UniformToFill" />
-                                    <TextBlock Text="{Binding Name}" FontSize="22" FontWeight="Bold" Foreground="#6F4E37" Margin="0,0,0,6"/>
-                                    <TextBlock Text="{Binding Description}" FontSize="15" Foreground="#7B4F2A" TextWrapping="Wrap" Margin="0,0,0,10"/>
-                                    <TextBlock Text="{Binding Price, StringFormat='{}{0:C}'}" FontSize="20" FontWeight="Bold" Foreground="#27ae60" Margin="0,0,0,14"/>
-                                    <Button Content="Add to Order" Command="{Binding DataContext.AddToOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="0,0,0,0" Height="38" Background="#6F4E37" Foreground="White" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand"/>
+                            <Border CornerRadius="20" BorderBrush="#BFA37A" BorderThickness="2" Margin="20" Padding="18" Background="#FFF8F0" Effect="{DynamicResource DropShadowEffect}">
+                                <StackPanel Width="220" Height="320" VerticalAlignment="Center">
+                                    <Image Source="{Binding ImageUrl}" Height="110" Width="110" Margin="0,0,0,12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" ImageFailed="Image_ImageFailed" />
+                                    <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="Bold" Foreground="#6F4E37" Margin="0,0,0,6"/>
+                                    <TextBlock Text="{Binding Description}" FontSize="14" Foreground="#7B4F2A" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                                    <TextBlock Text="{Binding Price, StringFormat='{}{0:C}'}" FontSize="18" FontWeight="Bold" Foreground="#27ae60" Margin="0,0,0,14"/>
+                                    <Button Content="Add to Order" Command="{Binding DataContext.AddToOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="0,0,0,0" Height="32" Background="#6F4E37" Foreground="White" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand"/>
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
