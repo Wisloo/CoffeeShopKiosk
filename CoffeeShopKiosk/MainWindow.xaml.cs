@@ -9,7 +9,14 @@ namespace CoffeeShopKiosk
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainViewModel();
+            var vm = new MainViewModel();
+            DataContext = vm;
+
+            // Show a simple confirmation when an order is placed
+            vm.Cart.OrderPlaced += order =>
+            {
+                MessageBox.Show($"Order {order.OrderId} placed — Total {order.TotalAmount:C}", "Order Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+            };
         }
     }
 }

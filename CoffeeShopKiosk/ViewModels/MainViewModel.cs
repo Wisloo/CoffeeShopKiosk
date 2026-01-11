@@ -8,6 +8,7 @@ namespace CoffeeShopKiosk.ViewModels
     public class MainViewModel : BaseViewModel
     {
         private readonly ProductService _productService;
+        private readonly OrderService _orderService;
         private ObservableCollection<ProductModel> _products;
 
         public ObservableCollection<ProductModel> Products
@@ -16,23 +17,24 @@ namespace CoffeeShopKiosk.ViewModels
             set { _products = value; OnPropertyChanged(); }
         }
 
-        public ICommand PurchaseCommand { get; }
+        public CartViewModel Cart { get; }
+
+        public ICommand AddToOrderCommand { get; }
 
         public MainViewModel()
         {
             _productService = new ProductService();
+            _orderService = new OrderService();
+            Cart = new CartViewModel(_orderService);
+
             LoadProducts();
-            PurchaseCommand = new RelayCommand<ProductModel>(PurchaseProduct);
+
+            AddToOrderCommand = new RelayCommand<ProductModel>(p => Cart.AddToCart(p));
         }
 
         private void LoadProducts()
         {
             Products = new ObservableCollection<ProductModel>(_productService.GetAllProducts());
-        }
-
-        private void PurchaseProduct(ProductModel product)
-        {
-            // Logic to handle product purchase
         }
     }
 }

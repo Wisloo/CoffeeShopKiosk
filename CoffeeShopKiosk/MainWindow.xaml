@@ -8,8 +8,13 @@
             <RowDefinition Height="100"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="360" />
+        </Grid.ColumnDefinitions>
+
         <!-- Coffee-themed header -->
-        <Border Grid.Row="0" Background="#4B2E19" CornerRadius="0,0,32,32" Height="100" VerticalAlignment="Top" Effect="{DynamicResource DropShadowEffect}">
+        <Border Grid.Row="0" Grid.ColumnSpan="2" Background="#4B2E19" CornerRadius="0,0,32,32" Height="100" VerticalAlignment="Top" Effect="{DynamicResource DropShadowEffect}">
             <DockPanel LastChildFill="True">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="30,0,0,0">
                     <!-- Coffee cup icon (SVG Path) -->
@@ -23,9 +28,13 @@
                 </StackPanel>
             </DockPanel>
         </Border>
-        <!-- Minimal image test -->
-        <Image Source="pack://siteoforigin:,,,/CoffeeShopKiosk/Images/Espresso.jpg" Width="100" Height="100" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20"/>
-        <local:ProductListView Grid.Row="1" />
+
+        <!-- Main product list -->
+        <local:ProductListView Grid.Row="1" Grid.Column="0" Margin="24,24,8,24" />
+
+        <!-- Cart side panel -->
+        <local:CartView Grid.Row="1" Grid.Column="1" DataContext="{Binding Cart}" Margin="8,24,24,24" />
+
         <Grid.Resources>
             <DropShadowEffect x:Key="DropShadowEffect" Color="#000" BlurRadius="16" ShadowDepth="2" Opacity="0.18" />
         </Grid.Resources>
