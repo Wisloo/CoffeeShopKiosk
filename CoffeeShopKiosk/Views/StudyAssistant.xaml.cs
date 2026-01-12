@@ -33,16 +33,36 @@ namespace CoffeeShopKiosk.Views
         {
             await _vm.Send();
             if (MessagesList.Parent is System.Windows.Controls.ScrollViewer sv) sv.ScrollToEnd();
+            InputBox.Focus();
         }
 
         private void Clear_Click(object sender, RoutedEventArgs e)
         {
             _vm.ClearCommand.Execute(null);
+            InputBox.Focus();
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Ensure the input box is focused when the assistant opens so typing works immediately
+            InputBox.Focus();
+        }
+
+        private async void InputBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            // Press Enter (without Shift) to send the message; Shift+Enter allows newlines if AcceptsReturn were enabled
+            if (e.Key == System.Windows.Input.Key.Enter && (System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Shift) == 0)
+            {
+                e.Handled = true;
+                await _vm.Send();
+                if (MessagesList.Parent is System.Windows.Controls.ScrollViewer sv) sv.ScrollToEnd();
+                InputBox.Focus();
+            }
         }
     }
 }

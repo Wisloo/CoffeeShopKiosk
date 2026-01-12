@@ -10,6 +10,9 @@
     <Content Include="CoffeeShopKiosk/Images/*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <!-- Exclude legacy ambient service files from compilation (removed functionality) -->

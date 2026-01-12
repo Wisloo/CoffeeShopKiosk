@@ -1,7 +1,7 @@
 <Window x:Class="CoffeeShopKiosk.Views.StudyAssistant"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Study Assistant" Width="420" Height="320" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+        Title="Study Assistant" Width="420" Height="320" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" Loaded="Window_Loaded">
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -29,7 +29,7 @@
 
         <!-- Input -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
-            <TextBox x:Name="InputBox" Width="320" Height="36" VerticalAlignment="Center" Text="" AcceptsReturn="True" TextWrapping="Wrap" />
+            <TextBox x:Name="InputBox" Width="320" Height="36" VerticalAlignment="Center" Text="" AcceptsReturn="False" TextWrapping="NoWrap" KeyDown="InputBox_KeyDown" />
             <Button Content="Send" Width="80" Height="36" Margin="8,0,0,0" Click="Send_Click" />
         </StackPanel>
 
