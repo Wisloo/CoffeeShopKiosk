@@ -14,20 +14,20 @@ namespace CoffeeShopKiosk.Views
             var s = _settingsService.Settings;
             Spotlight.IsChecked = s.SpotlightEnabled;
             HideImages.IsChecked = s.HideProductImages;
-            AmbientEnabled.IsChecked = s.AmbientSoundEnabled;
-            SoundChoice.SelectedIndex = 0; // Rain
-            Volume.Value = s.AmbientSoundVolume;
+            EnableAI.IsChecked = s.EnableAIStudyAssistant;
+            ThemeChoice.SelectedValue = s.VisualTheme;
+            EnableVisuals.IsChecked = s.VisualEffectsEnabled;
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            _settingsService.Update(s =>
+            _settingsService.Update(st =>
             {
-                s.SpotlightEnabled = Spotlight.IsChecked == true;
-                s.HideProductImages = HideImages.IsChecked == true;
-                s.AmbientSoundEnabled = AmbientEnabled.IsChecked == true;
-                s.AmbientSoundChoice = (SoundChoice.SelectedValue ?? "Rain").ToString();
-                s.AmbientSoundVolume = Volume.Value;
+                st.SpotlightEnabled = Spotlight.IsChecked == true;
+                st.HideProductImages = HideImages.IsChecked == true;
+                st.EnableAIStudyAssistant = EnableAI.IsChecked == true;
+                st.VisualTheme = (ThemeChoice.SelectedValue ?? "Cafe").ToString();
+                st.VisualEffectsEnabled = EnableVisuals.IsChecked == true;
             });
 
             DialogResult = true;

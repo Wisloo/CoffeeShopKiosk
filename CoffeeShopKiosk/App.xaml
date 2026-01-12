@@ -10,12 +10,12 @@
                 <!-- Add any merged resource dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Cafe-inspired color palette -->
-            <Color x:Key="CoffeeBrownColor">#4B2E19</Color>
-            <Color x:Key="CreamColor">#FFF8F0</Color>
-            <Color x:Key="CardColor">#FFF6EE</Color>
-            <Color x:Key="AccentGreenColor">#27ae60</Color>
-            <Color x:Key="MutedTextColor">#5A3E2E</Color>
+            <!-- Cafe-inspired color palette (brighter defaults) -->
+            <Color x:Key="CoffeeBrownColor">#5B3A2A</Color>
+            <Color x:Key="CreamColor">#FFF9F6</Color>
+            <Color x:Key="CardColor">#FFF8F3</Color>
+            <Color x:Key="AccentGreenColor">#36B37E</Color>
+            <Color x:Key="MutedTextColor">#6B473A</Color>
 
             <SolidColorBrush x:Key="CoffeeBrown" Color="{StaticResource CoffeeBrownColor}" />
             <SolidColorBrush x:Key="Cream" Color="{StaticResource CreamColor}" />
@@ -77,7 +77,7 @@
                 </Style.Triggers>
             </Style>
 
-            <!-- No-motion alternative (used in Study Mode) -->
+            <!-- No-motion alternative (used when ReduceMotion is enabled) -->
             <Style TargetType="Border" x:Key="ProductCardHoverStyle_NoMotion">
                 <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
                 <Setter Property="Effect">
@@ -168,6 +168,101 @@
                 </Style.Triggers>
             </Style>
 
+            <!-- ComboBox style for header theme selector (modernized) -->
+            <converters:ThemeToBrushConverter x:Key="ThemeToBrush" />
+            <Style TargetType="ComboBox" x:Key="PrimaryComboBox">
+                <Setter Property="Background" Value="{DynamicResource Cream}" />
+                <Setter Property="Foreground" Value="{DynamicResource CoffeeBrown}" />
+                <Setter Property="Padding" Value="8,6" />
+                <Setter Property="Height" Value="36" />
+                <Setter Property="MinWidth" Value="140" />
+                <Setter Property="BorderBrush" Value="{DynamicResource CoffeeBrown}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ComboBox">
+                            <Grid>
+                                <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                    <Grid>
+                                        <!-- Make the entire header area clickable by using one ToggleButton that contains both content and arrow -->
+                                        <ToggleButton x:Name="ToggleButton" IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" Focusable="False" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Transparent" BorderThickness="0">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition />
+                                                    <ColumnDefinition Width="34" />
+                                                </Grid.ColumnDefinitions>
+                                                <ContentPresenter Grid.Column="0" x:Name="ContentSite" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" VerticalAlignment="Center" Margin="6,0,8,0" RecognizesAccessKey="True" IsHitTestVisible="False" />
+                                                <Grid Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Path x:Name="Arrow" Data="M 0 0 L 8 0 L 4 4 Z" Fill="{TemplateBinding Foreground}" RenderTransformOrigin="0.5,0.5" />
+                                                </Grid>
+                                            </Grid>
+                                        </ToggleButton>
+                                    </Grid>
+                                </Border>
+                                <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                                    <Border Background="{DynamicResource CardBackground}" CornerRadius="8" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" Padding="6" Effect="{DynamicResource DropShadowEffect}">
+                                        <ScrollViewer CanContentScroll="True" MaxHeight="260">
+                                            <StackPanel IsItemsHost="True" />
+                                        </ScrollViewer>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Bd" Property="Opacity" Value="0.6" />
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource CoffeeBrown}" />
+                                </Trigger>
+                                <Trigger Property="IsDropDownOpen" Value="True">
+                                    <Setter TargetName="Arrow" Property="RenderTransform">
+                                        <Setter.Value>
+                                            <RotateTransform Angle="180" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="ItemContainerStyle">
+                    <Setter.Value>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Padding" Value="8,6" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="Foreground" Value="{DynamicResource CoffeeBrown}" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ComboBoxItem">
+                                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="4">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="32" />
+                                                </Grid.ColumnDefinitions>
+                                                <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                                <Ellipse Grid.Column="1" Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{Binding Content, Converter={StaticResource ThemeToBrush}}" Stroke="#EDE7E3" StrokeThickness="1" />
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsHighlighted" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="#FFF6F0" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource CoffeeBrown}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource Cream}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
             <!-- Toast style -->
             <Style TargetType="Border" x:Key="ToastStyle">
                 <Setter Property="Background" Value="#3A2A1F" />
@@ -180,6 +275,7 @@
             <!-- Converters -->
             <converters:BooleanToPeriodConverter x:Key="BooleanToPeriodConverter" />
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+            <converters:RoleToBrushConverter x:Key="RoleToBrush" />
             <BooleanToVisibilityConverter x:Key="BoolToVis" />
 
             <!-- PrimaryButton moved above to resolve resource lookup order -->
@@ -203,6 +299,8 @@
             </Style>
 
             <!-- Card style -->
+            <!-- Global drop shadow resource (used by templates via StaticResource) -->
+            <DropShadowEffect x:Key="DropShadowEffect" Color="#000" BlurRadius="12" ShadowDepth="3" Opacity="0.12" />
             <Style x:Key="CardStyle" TargetType="Border">
                 <Setter Property="CornerRadius" Value="14" />
                 <Setter Property="Background" Value="{DynamicResource CardBackground}" />
@@ -210,7 +308,7 @@
                 <Setter Property="Margin" Value="12" />
                 <Setter Property="Effect">
                     <Setter.Value>
-                        <DropShadowEffect Color="#000" BlurRadius="12" ShadowDepth="3" Opacity="0.12" />
+                        <StaticResource ResourceKey="DropShadowEffect" />
                     </Setter.Value>
                 </Setter>
             </Style>

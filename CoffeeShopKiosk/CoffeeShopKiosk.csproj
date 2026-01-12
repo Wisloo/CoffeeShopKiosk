@@ -11,4 +11,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
+  <!-- Exclude legacy ambient service files from compilation (removed functionality) -->
+  <ItemGroup>
+    <Compile Remove="Services\AmbientSoundService.cs" />
+    <Compile Remove="Services\AmbientVisualService.cs" />
+  </ItemGroup>
 </Project>

@@ -20,7 +20,17 @@ namespace CoffeeShopKiosk.ViewModels
         public PomodoroViewModel Pomodoro { get; }
 
         public ICommand AddToOrderCommand { get; }
-        public ICommand ToggleStudyModeCommand { get; }
+
+        // Expose the currently selected visual theme (backed by settings)
+        public string VisualTheme
+        {
+            get => _settingsService.Settings.VisualTheme;
+            set
+            {
+                _settingsService.Update(s => s.VisualTheme = value);
+                OnPropertyChanged();
+            }
+        }
 
         public MainViewModel()
         {
@@ -33,41 +43,16 @@ namespace CoffeeShopKiosk.ViewModels
             LoadProducts();
 
             AddToOrderCommand = new RelayCommand<ProductModel>(p => Cart.AddToCart(p));
-            // Accept an optional parameter (bool) to explicitly set Study Mode; otherwise toggle
-            ToggleStudyModeCommand = new RelayCommand<object>(p => ToggleStudyMode(p));
         }
 
         private void LoadProducts()
         {
             Products = new ObservableCollection<ProductModel>(_productService.GetAllProducts());
         }
-        private void ToggleStudyMode(object parameter)
-        {
-            if (parameter is bool explicitValue)
-            {
-                _settingsService.Update(s => s.StudyMode = explicitValue);
-            }
-            else
-            {
-                var current = _settingsService.Settings.StudyMode;
-                _settingsService.Update(s => s.StudyMode = !current);
-            }
 
-            // Raise property changed so views can react
-            OnPropertyChanged(nameof(IsStudyMode));
-        }
 
-        public bool IsStudyMode
-        {
-            get => _settingsService.Settings.StudyMode;
-            set
-            {
-                _settingsService.Update(s => s.StudyMode = value);
-                OnPropertyChanged();
-            }
-        }
 
-        // Exposed for product list to hide images when Study Mode + setting is enabled
+
         private bool _isHideProductImages;
         public bool IsHideProductImages
         {

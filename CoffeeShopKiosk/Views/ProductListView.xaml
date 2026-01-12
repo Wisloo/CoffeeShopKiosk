@@ -3,9 +3,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid>
         <Grid.Background>
+            <!-- Brighter, softer cafe gradient -->
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="#6F4E37" Offset="0.0" />
-                <GradientStop Color="#C7A17A" Offset="1.0" />
+                <GradientStop Color="#FFF3EB" Offset="0.0" />
+                <GradientStop Color="#F2E6DC" Offset="1.0" />
             </LinearGradientBrush>
         </Grid.Background>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -46,7 +47,8 @@
             </StackPanel>
         </ScrollViewer>
         <Grid.Resources>
-            <DropShadowEffect x:Key="DropShadowEffect" Color="#6F4E37" BlurRadius="16" ShadowDepth="3" Opacity="0.25" />
+            <!-- softer, neutral shadow for lighter background -->
+            <DropShadowEffect x:Key="DropShadowEffect" Color="#000000" BlurRadius="12" ShadowDepth="3" Opacity="0.08" />
         </Grid.Resources>
     </Grid>
 </UserControl>

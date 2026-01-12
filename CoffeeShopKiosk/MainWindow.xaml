@@ -3,11 +3,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:views="clr-namespace:CoffeeShopKiosk.Views"
     xmlns:app="clr-namespace:CoffeeShopKiosk"
-    Title="Coffee Shop Kiosk" WindowState="Maximized" WindowStyle="SingleBorderWindow" ResizeMode="CanResize">
-    <Window.InputBindings>
-        <!-- Use a routed command defined on this Window; use a KeyGesture string to avoid ModifierKeys parsing issues -->
-        <KeyBinding Command="{x:Static app:MainWindow.ToggleStudyModeRoutedCommand}" Gesture="Ctrl+Shift+S" />
-    </Window.InputBindings>    <Grid>
+    Title="Coffee Shop Kiosk" WindowState="Maximized" WindowStyle="SingleBorderWindow" ResizeMode="CanResize"
+    KeyDown="Window_KeyDown">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="100"/>
             <RowDefinition Height="*"/>
@@ -24,6 +22,9 @@
                 <GradientStop Color="#F1E6DE" Offset="1" />
             </LinearGradientBrush>
         </Grid.Background>
+
+        <!-- Theme visuals overlay (e.g., rain drops) -->
+        <views:ThemeVisualsControl x:Name="ThemeVisuals" Grid.RowSpan="2" Grid.ColumnSpan="2" IsHitTestVisible="False" />
 
         <!-- Coffee-themed header -->
         <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{DynamicResource CoffeeBrown}" CornerRadius="0,0,32,32" Height="100" VerticalAlignment="Top" Effect="{DynamicResource DropShadowEffect}">
@@ -50,13 +51,14 @@
 
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,24,0" HorizontalAlignment="Right">
                     <StackPanel Orientation="Horizontal">
-                        <ToggleButton x:Name="ThemeToggle" Width="220" Height="34" Margin="0,0,10,0" Style="{StaticResource PrimaryToggleButton}" ToolTip="Toggle Study Mode (Ctrl+Shift+S)" IsChecked="{Binding IsStudyMode, Mode=TwoWay}" AutomationProperties.Name="Toggle Study Mode">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="Study Mode" Margin="0,0,8,0" />
-                                <TextBlock Text="Ctrl+Shift+S" FontSize="12" Opacity="0.7" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </ToggleButton>
-                        <Button x:Name="OpenStudySettings" Content="⚙" Width="36" Height="34" Style="{StaticResource SecondaryButton}" ToolTip="Study Settings" />
+                        <ComboBox x:Name="ThemeSelector" Width="220" Height="34" Margin="0,0,10,0" Style="{StaticResource PrimaryComboBox}" SelectedValuePath="Content" ToolTip="Select visual theme">
+                            <ComboBoxItem>Cafe</ComboBoxItem>
+                            <ComboBoxItem>Rain</ComboBoxItem>
+                            <ComboBoxItem>Sunset</ComboBoxItem>
+                            <ComboBoxItem>Minimal</ComboBoxItem>
+                        </ComboBox>
+                        <Button x:Name="OpenStudyAssistant" Content="Study" Width="80" Height="34" Style="{StaticResource SecondaryButton}" ToolTip="Study Assistant (Ctrl+I)" Margin="0,0,8,0" />
+                        <Button x:Name="OpenVisualSettings" Content="⚙" Width="36" Height="34" Style="{StaticResource SecondaryButton}" ToolTip="Visual Settings" />
                     </StackPanel>
                     <Button x:Name="ToggleCart" Content="Hide Cart" Width="100" Height="34" Style="{StaticResource SecondaryButton}" />
                 </StackPanel>
@@ -70,13 +72,12 @@
         <StackPanel Grid.Row="1" Grid.Column="1" x:Name="CartPanel" Margin="8,24,24,24">
             <views:CartView DataContext="{Binding Cart}" />
             <views:PomodoroView DataContext="{Binding Pomodoro}" Margin="0,12,0,0" />
-            <views:AmbientSoundControl Margin="0,12,0,0" />
         </StackPanel>
 
         <!-- Toast host (non-blocking notifications) -->
         <views:ToastHost Grid.Row="0" Grid.Column="1" x:Name="ToastHost" />
 
-        <!-- Spotlight overlay (covers content when Study Mode + SpotlightEnabled) -->
+        <!-- Spotlight overlay (covers content when SpotlightEnabled) -->
         <views:SpotlightOverlay x:Name="SpotlightOverlay" Grid.RowSpan="2" Grid.ColumnSpan="2" />
 
         <Grid.Resources>

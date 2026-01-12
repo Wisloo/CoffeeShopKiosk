@@ -5,9 +5,14 @@ namespace CoffeeShopKiosk.Views
 {
     public partial class ReceiptModal : Window
     {
-        public ReceiptModal(OrderModel order)
+        // Parameterless ctor for designer and IntelliSense to instantiate at design-time
+        public ReceiptModal()
         {
             InitializeComponent();
+        }
+
+        public ReceiptModal(OrderModel order) : this()
+        {
             DataContext = order;
         }
 

@@ -2,7 +2,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid IsHitTestVisible="False">
-        <!-- Semi-transparent dim overlay that is visible during Study Mode -->
+        <!-- Semi-transparent dim overlay that is visible when Spotlight is enabled -->
         <Rectangle x:Name="Dim" Fill="#80000000" Visibility="Collapsed" />
     </Grid>
 </UserControl>

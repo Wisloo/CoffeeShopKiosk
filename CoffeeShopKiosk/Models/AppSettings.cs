@@ -10,20 +10,23 @@ namespace CoffeeShopKiosk.Models
 
     public class AppSettings
     {
-        public bool StudyMode { get; set; } = false;
+        // Visual theme and accessibility
+        public string VisualTheme { get; set; } = "Cafe"; // Main theme is Cafe
         public bool DoNotDisturb { get; set; } = false;
-        public bool ReduceMotion { get; set; } = true; // default to reduced motion when StudyMode enabled
+        public bool ReduceMotion { get; set; } = true;
         public int PomodoroWorkMinutes { get; set; } = 25;
         public int PomodoroBreakMinutes { get; set; } = 5;
-        public bool AutoStartPomodoroOnStudyMode { get; set; } = true;
+
         // Focus Spotlight & UI toggles
-        public bool SpotlightEnabled { get; set; } = true;
+        public bool SpotlightEnabled { get; set; } = false;
         public bool HideProductImages { get; set; } = false;
 
-        // Ambient focus sound settings
-        public bool AmbientSoundEnabled { get; set; } = false;
-        public string AmbientSoundChoice { get; set; } = "Rain"; // simple default
-        public double AmbientSoundVolume { get; set; } = 0.5;
+        // Visual effect toggle
+        public bool VisualEffectsEnabled { get; set; } = true;
+
         public List<PresetOrder> Presets { get; set; } = new List<PresetOrder>();
+
+        // AI feature toggles
+        public bool EnableAIStudyAssistant { get; set; } = false;
     }
 }
