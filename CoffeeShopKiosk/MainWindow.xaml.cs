@@ -126,6 +126,7 @@ namespace CoffeeShopKiosk
                     // Update Study Assistant availability UI
                     OpenStudyAssistant.IsEnabled = settings.Settings.EnableAIStudyAssistant;
                     OpenStudyAssistant.ToolTip = settings.Settings.EnableAIStudyAssistant ? "Study Assistant (Ctrl+I)" : "Study Assistant is disabled — enable in Visual Settings";
+                    AIBanner.Visibility = settings.Settings.EnableAIStudyAssistant ? System.Windows.Visibility.Collapsed : System.Windows.Visibility.Visible;
                 }
             };
 
@@ -201,6 +202,20 @@ namespace CoffeeShopKiosk
 
                 var assistant = new Views.StudyAssistant() { Owner = this };
                 assistant.ShowDialog();
+            }
+        }
+
+        private void EnableAI_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            // Open Visual Settings dialog and guide the user
+            var dlg = new Views.StudySettings() { Owner = this };
+            var res = dlg.ShowDialog();
+            if (res == true)
+            {
+                var settings = new SettingsService();
+                OpenStudyAssistant.IsEnabled = settings.Settings.EnableAIStudyAssistant;
+                OpenStudyAssistant.ToolTip = settings.Settings.EnableAIStudyAssistant ? "Study Assistant (Ctrl+I)" : "Study Assistant is disabled — enable in Visual Settings";
+                AIBanner.Visibility = settings.Settings.EnableAIStudyAssistant ? System.Windows.Visibility.Collapsed : System.Windows.Visibility.Visible;
             }
         }
 

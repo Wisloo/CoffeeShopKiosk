@@ -27,6 +27,10 @@ namespace CoffeeShopKiosk.Models
         public List<PresetOrder> Presets { get; set; } = new List<PresetOrder>();
 
         // AI feature toggles
-        public bool EnableAIStudyAssistant { get; set; } = false;
+        // Enabled by default in dev builds so the Study Assistant is visible for testing
+        public bool EnableAIStudyAssistant { get; set; } = true;
+
+        // Optional API key stored locally (optional; overrides OPENAI_API_KEY if set)
+        public string OpenAIKey { get; set; } = string.Empty; 
     }
 }

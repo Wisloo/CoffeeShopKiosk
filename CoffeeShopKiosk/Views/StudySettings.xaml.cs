@@ -26,6 +26,7 @@ namespace CoffeeShopKiosk.Views
                 st.SpotlightEnabled = Spotlight.IsChecked == true;
                 st.HideProductImages = HideImages.IsChecked == true;
                 st.EnableAIStudyAssistant = EnableAI.IsChecked == true;
+                st.OpenAIKey = ApiKeyBox.Password ?? string.Empty;
                 st.VisualTheme = (ThemeChoice.SelectedValue ?? "Cafe").ToString();
                 st.VisualEffectsEnabled = EnableVisuals.IsChecked == true;
             });

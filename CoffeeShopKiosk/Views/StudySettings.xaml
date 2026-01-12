@@ -8,6 +8,12 @@
             <CheckBox x:Name="Spotlight" Content="Enable Focus Spotlight" Margin="0,6" />
             <CheckBox x:Name="HideImages" Content="Hide product images" Margin="0,6" />
             <CheckBox x:Name="EnableAI" Content="Enable AI Study Assistant (opt-in)" Margin="0,6" />
+
+            <!-- API Key (optional) -->
+            <TextBlock Text="OpenAI API Key (optional)" Margin="0,6,0,0" />
+            <PasswordBox x:Name="ApiKeyBox" Width="330" Margin="0,6,0,0" ToolTip="Paste your OpenAI API key here to enable real AI responses" />
+            <TextBlock Text="If left empty, the assistant will use local fallback tips." FontSize="11" Opacity="0.7" Margin="0,4,0,0" />
+
             <Separator Margin="0,8" />
             <StackPanel Orientation="Horizontal" Margin="0,6">
                 <TextBlock Text="Theme" VerticalAlignment="Center" Margin="0,0,8,0" />

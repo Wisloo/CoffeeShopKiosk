@@ -22,6 +22,20 @@ namespace CoffeeShopKiosk.Services
         {
             _http = httpClient ?? new HttpClient();
             _apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? string.Empty;
+
+            // If no environment key is configured, fall back to stored local settings (if present)
+            if (string.IsNullOrWhiteSpace(_apiKey))
+            {
+                try
+                {
+                    var s = new SettingsService();
+                    _apiKey = s.Settings.OpenAIKey ?? string.Empty;
+                }
+                catch
+                {
+                    // ignore and continue with empty key (local fallback)
+                }
+            }
         }
 
         public async Task<string> GetStudyTipAsync(string topic)
