@@ -298,6 +298,12 @@
                 </Setter>
             </Style>
 
+            <!-- Header button style (for buttons placed in dark header) -->
+            <Style TargetType="Button" x:Key="HeaderButton" BasedOn="{StaticResource SecondaryButton}">
+                <Setter Property="Foreground" Value="{DynamicResource Cream}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource Cream}" />
+            </Style>
+
             <!-- Card style -->
             <!-- Global drop shadow resource (used by templates via StaticResource) -->
             <DropShadowEffect x:Key="DropShadowEffect" Color="#000" BlurRadius="12" ShadowDepth="3" Opacity="0.12" />
