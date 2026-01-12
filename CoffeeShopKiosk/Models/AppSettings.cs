@@ -31,6 +31,9 @@ namespace CoffeeShopKiosk.Models
         public bool EnableAIStudyAssistant { get; set; } = true;
 
         // Optional API key stored locally (optional; overrides OPENAI_API_KEY if set)
-        public string OpenAIKey { get; set; } = string.Empty; 
+        public string OpenAIKey { get; set; } = string.Empty;
+
+        // Developer debug: record raw AI responses for troubleshooting (opt-in)
+        public bool EnableAIDebugLogging { get; set; } = false;
     }
 }

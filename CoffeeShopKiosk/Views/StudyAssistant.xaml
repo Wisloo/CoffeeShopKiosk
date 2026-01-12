@@ -18,6 +18,26 @@
                             <Border Padding="8" Margin="0,4" CornerRadius="6" Background="{Binding Role, Converter={StaticResource RoleToBrush}}">
                                 <StackPanel>
                                     <TextBlock Text="{Binding Text}" TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding Source}" FontSize="10" Opacity="0.7" Margin="0,0,8,0" />
+                                        <TextBlock Text="{Binding Confidence, StringFormat='Confidence: {0:P0}'}" FontSize="10" Opacity="0.7" />
+                                    </StackPanel>
+
+                                    <!-- Quick feedback buttons for assistant messages -->
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,6,0,0" Visibility="{Binding Role, Converter={StaticResource RoleToBrush}, ConverterParameter=showFeedback}">
+                                        <Button Content="👍" Width="36" Height="26" Click="FeedbackYes_Click" Tag="{Binding}" />
+                                        <Button Content="👎" Width="36" Height="26" Margin="6,0,0,0" Click="FeedbackNo_Click" Tag="{Binding}" />
+                                    </StackPanel>
+
+                                    <!-- Sources list -->
+                                    <ItemsControl ItemsSource="{Binding Sources}" Margin="0,6,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}" FontSize="11" Foreground="#3A2A1F" TextDecorations="Underline" Cursor="Hand" MouseDown="SourceLink_Click" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
                                     <TextBlock Text="{Binding Timestamp, StringFormat='t'}" FontSize="10" Opacity="0.7" HorizontalAlignment="Right" />
                                 </StackPanel>
                             </Border>
@@ -34,6 +54,7 @@
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button Content="Show raw response" Width="140" Click="ShowRaw_Click" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" />
             <Button Content="Clear" Width="80" Click="Clear_Click" Style="{StaticResource SecondaryButton}" />
             <Button Content="Close" Width="80" Click="Close_Click" Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" />
         </StackPanel>

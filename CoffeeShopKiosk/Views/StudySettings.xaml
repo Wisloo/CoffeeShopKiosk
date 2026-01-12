@@ -11,7 +11,11 @@
 
             <!-- API Key (optional) -->
             <TextBlock Text="OpenAI API Key (optional)" Margin="0,6,0,0" />
-            <PasswordBox x:Name="ApiKeyBox" Width="330" Margin="0,6,0,0" ToolTip="Paste your OpenAI API key here to enable real AI responses" />
+            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                <PasswordBox x:Name="ApiKeyBox" Width="260" ToolTip="Paste your OpenAI API key here to enable real AI responses" />
+                <Button x:Name="TestApiKey" Content="Test key" Width="80" Margin="8,0,0,0" Click="TestApiKey_Click" Style="{StaticResource SecondaryButton}" />
+            </StackPanel>
+            <CheckBox x:Name="EnableDebug" Content="Enable AI debug logging (developer only)" Margin="0,8,0,0" />
             <TextBlock Text="If left empty, the assistant will use local fallback tips." FontSize="11" Opacity="0.7" Margin="0,4,0,0" />
 
             <Separator Margin="0,8" />

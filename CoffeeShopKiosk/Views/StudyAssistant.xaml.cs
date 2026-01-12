@@ -1,6 +1,9 @@
+using System;
+using System.Linq;
 using System.Windows;
 using CoffeeShopKiosk.Services;
 using CoffeeShopKiosk.ViewModels;
+using CoffeeShopKiosk.Models;
 
 namespace CoffeeShopKiosk.Views
 {
@@ -34,8 +37,63 @@ namespace CoffeeShopKiosk.Views
             await _vm.Send();
             if (MessagesList.Parent is System.Windows.Controls.ScrollViewer sv) sv.ScrollToEnd();
             InputBox.Focus();
+
+            // If the assistant produced a fallback message, notify the user and suggest enabling debug logging
+            var lastAssistant = _vm.Messages.LastOrDefault(m => m.Role == "assistant");
+            if (lastAssistant != null && lastAssistant.Source == "fallback")
+            {
+                MessageBox.Show("The assistant couldn't generate a full answer. Try again or enable AI debug logging in Visual Settings and then use 'Show raw response' to inspect the response.", "Incomplete Answer", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
+        private void SourceLink_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is System.Windows.Controls.TextBlock tb && Uri.IsWellFormedUriString(tb.Text, UriKind.Absolute))
+            {
+                try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(tb.Text) { UseShellExecute = true }); } catch { }
+            }
+        }
+
+        private void FeedbackYes_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button b && b.Tag is ChatMessage cm)
+            {
+                _vm.HelpFeedbackCommand.Execute(System.Tuple.Create(cm, true));
+            }
+        }
+
+        private void FeedbackNo_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button b && b.Tag is ChatMessage cm)
+            {
+                _vm.HelpFeedbackCommand.Execute(System.Tuple.Create(cm, false));
+            }
+        }
+
+        private void ShowRaw_Click(object sender, RoutedEventArgs e)
+        {
+            var settings = new SettingsService();
+            if (!settings.Settings.EnableAIDebugLogging)
+            {
+                MessageBox.Show("AI debug logging is disabled. Enable it in Visual Settings to see raw responses.", "Debug Disabled", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var telemetry = new TelemetryService();
+            var last = telemetry.GetLastRawResponse();
+            if (string.IsNullOrWhiteSpace(last))
+            {
+                MessageBox.Show("No raw responses found yet.", "Raw Response", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                // Show a better formatted view that lets the user copy the raw response
+                var win = new Window { Title = "Raw Response", Width = 600, Height = 400, Owner = this };
+                var tb = new System.Windows.Controls.TextBox { Text = last, IsReadOnly = true, TextWrapping = System.Windows.TextWrapping.Wrap, VerticalScrollBarVisibility = System.Windows.Controls.ScrollBarVisibility.Auto };
+                win.Content = tb;
+                win.ShowDialog();
+            }
+        }
         private void Clear_Click(object sender, RoutedEventArgs e)
         {
             _vm.ClearCommand.Execute(null);
