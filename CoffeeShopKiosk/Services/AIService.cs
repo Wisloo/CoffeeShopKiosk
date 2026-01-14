@@ -79,14 +79,28 @@ namespace CoffeeShopKiosk.Services
         public async Task<string> ChatAsync(string userMessage, object? context = null)
         {
             // Build strong system prompt with few-shot examples requesting JSON output and including wiki snippets when available
-            var system = "You are a concise, friendly study assistant for college students. Keep answers short and action-oriented. Reply with valid JSON and ONLY valid JSON using fields: summary (1 sentence), tips (array of 1-2 sentence tips), action (one short actionable item), confidence (0-1), sources (array of source URLs). Do NOT include any explanatory text, markdown, or additional commentary — only emit the JSON object. Use the provided 'wiki snippets' to ground facts when present and include any URLs you used in the sources array. If you cannot answer, set summary to 'I don't know' and offer a strategy to find out.";
+            // Default is structured JSON mode. If context asks for ChatMode (free-text), we'll send a more permissive system prompt.
+            bool chatMode = false;
+            if (context != null)
+            {
+                var prop = context.GetType().GetProperty("ChatMode");
+                if (prop != null && prop.GetValue(context) is bool b) chatMode = b;
+            }
 
-            // few-shot examples (include sources)
+            var system = chatMode
+                ? "You are a concise, friendly study assistant for college students. If the user asks a factual question, start with a single-sentence direct answer (e.g., 'The biggest animal is the blue whale (Balaenoptera musculus).'), then optionally add one short supporting sentence and list sources at the end. If it's not a factual question, provide a concise helpful answer and optionally 1-2 study tips. Use plain text. Do not emit JSON unless explicitly asked."
+                : "You are a concise, friendly study assistant for college students. Keep answers short and action-oriented. Reply with valid JSON and ONLY valid JSON using fields: summary (1 sentence), tips (array of 1-2 sentence tips), action (one short actionable item), confidence (0-1), sources (array of source URLs). The first field 'summary' should be a direct one-sentence answer to the user's question when possible. Do NOT include any explanatory text, markdown, or additional commentary — only emit the JSON object. Use the provided 'wiki snippets' to ground facts when present and include any URLs you used in the sources array. If you cannot answer, set summary to 'I don't know' and offer a strategy to find out.";
+
+            // few-shot examples (include sources). Use plain-text assistant examples when in chatMode.
             var example1User = "How can I study for an upcoming calculus exam?";
-            var example1Assistant = "{ \"summary\": \"Focus on problem practice and concept mapping.\", \"tips\": [\"Do 3-5 practice problems for each topic.\", \"Create a one-page formula cheat-sheet.\"], \"action\": \"Start a 25-min Pomodoro and solve 3 problems\", \"confidence\": 0.9, \"sources\": [] }";
+            var example1Assistant = chatMode
+                ? "Focus on problem practice and concept mapping. Tip: Do 3–5 practice problems for each topic; make a one-page formula sheet. Action: Start a 25‑minute Pomodoro and solve 3 problems."
+                : "{ \"summary\": \"Focus on problem practice and concept mapping.\", \"tips\": [\"Do 3-5 practice problems for each topic.\", \"Create a one-page formula cheat-sheet.\"], \"action\": \"Start a 25-min Pomodoro and solve 3 problems\", \"confidence\": 0.9, \"sources\": [] }";
 
             var example2User = "I don't know what the answer is to a question about niche genetics details.";
-            var example2Assistant = "{ \"summary\": \"I don't know\", \"tips\": [\"Check primary literature or consult your instructor for niche genetics topics.\"], \"action\": \"Search PubMed or ask your instructor\", \"confidence\": 0.0, \"sources\": [] }";
+            var example2Assistant = chatMode
+                ? "I don’t know the specific answer; for niche genetics topics, consult primary literature or ask your instructor. Action: Search PubMed or consult your instructor."
+                : "{ \"summary\": \"I don't know\", \"tips\": [\"Check primary literature or consult your instructor for niche genetics topics.\"], \"action\": \"Search PubMed or ask your instructor\", \"confidence\": 0.0, \"sources\": [] }";
 
             var messages = new List<object>
             {
@@ -124,13 +138,30 @@ namespace CoffeeShopKiosk.Services
                     var wiki = await GetWikiSnippetsAsync(userMessage, 3);
                     if (wiki.Count > 0)
                     {
-                        // Build a structured response from the top snippet(s)
                         var first = wiki[0];
-                        // Use first sentence of snippet as concise summary when possible
                         var summary = first.snippet;
                         var dot = summary.IndexOf('.');
                         if (dot > 0) summary = summary.Substring(0, dot + 1);
 
+                        if (chatMode)
+                        {
+                            // Plain text reply in chat mode
+                            var text = summary + "\n\nSources:\n" + string.Join("\n", wiki.ConvertAll(w => w.url));
+
+                            // record raw response when debug logging enabled
+                            try {
+                                var settings = new SettingsService();
+                                if (settings.Settings.EnableAIDebugLogging)
+                                {
+                                    var telemetry = new TelemetryService();
+                                    telemetry.RecordRawResponse(text);
+                                }
+                            } catch { }
+
+                            return text;
+                        }
+
+                        // Build a structured response from the top snippet(s)
                         var studyResp = new {
                             summary = summary,
                             tips = new[] { "Read the source for details.", "Compare multiple sources for accuracy.", "Take notes and summarize key facts." },
@@ -155,7 +186,7 @@ namespace CoffeeShopKiosk.Services
                 }
                 catch { }
 
-                // fallback: return structured JSON so UI parsing works consistently
+                // fallback: return structured JSON so UI parsing works consistently (or plain text for chat mode)
                 var local = GetLocalStructuredTip(userMessage);
                 try
                 {
@@ -167,6 +198,21 @@ namespace CoffeeShopKiosk.Services
                     }
                 }
                 catch { }
+
+                if (chatMode)
+                {
+                    var textLocal = GetLocalTip(userMessage);
+                    try {
+                        var settings = new SettingsService();
+                        if (settings.Settings.EnableAIDebugLogging)
+                        {
+                            var telemetry = new TelemetryService();
+                            telemetry.RecordRawResponse(textLocal);
+                        }
+                    } catch { }
+                    return textLocal;
+                }
+
                 return local;
             }
 
@@ -233,14 +279,45 @@ namespace CoffeeShopKiosk.Services
         {
             if (string.IsNullOrWhiteSpace(_apiKey))
             {
-                // If no API key, try to stream a WIkipedia-backed structured response where possible
+                // If no API key, try to stream a Wikipedia-backed response where possible
                 var wiki = await GetWikiSnippetsAsync(userMessage, 3);
+                // check context for chatMode
+                bool chatMode = false;
+                if (context != null)
+                {
+                    var prop = context.GetType().GetProperty("ChatMode");
+                    if (prop != null && prop.GetValue(context) is bool b) chatMode = b;
+                }
+
                 if (wiki.Count > 0)
                 {
                     var first = wiki[0];
                     var summary = first.snippet;
                     var dot = summary.IndexOf('.');
                     if (dot > 0) summary = summary.Substring(0, dot + 1);
+
+                    if (chatMode)
+                    {
+                        var text = summary + "\n\nSources:\n" + string.Join("\n", wiki.ConvertAll(w => w.url));
+                        foreach (var ch in text)
+                        {
+                            onPartial(ch.ToString());
+                            await Task.Delay(4);
+                        }
+
+                        try
+                        {
+                            var settings = new SettingsService();
+                            if (settings.Settings.EnableAIDebugLogging)
+                            {
+                                var telemetry = new TelemetryService();
+                                telemetry.RecordRawResponse(text);
+                            }
+                        }
+                        catch { }
+
+                        return text;
+                    }
 
                     var studyRespObj = new {
                         summary = summary,
@@ -274,7 +351,30 @@ namespace CoffeeShopKiosk.Services
                     return studyJson;
                 }
 
-                // fallback to local structured tip
+                // fallback to local structured tip (or plain text if chat mode requested)
+                if (chatMode)
+                {
+                    var textLocal = GetLocalTip(userMessage);
+                    foreach (var ch in textLocal)
+                    {
+                        onPartial(ch.ToString());
+                        await Task.Delay(4);
+                    }
+
+                    try
+                    {
+                        var settings = new SettingsService();
+                        if (settings.Settings.EnableAIDebugLogging)
+                        {
+                            var telemetry = new TelemetryService();
+                            telemetry.RecordRawResponse(textLocal);
+                        }
+                    }
+                    catch { }
+
+                    return textLocal;
+                }
+
                 var local = GetLocalStructuredTip(userMessage);
                 foreach (var ch in local)
                 {
@@ -394,6 +494,35 @@ namespace CoffeeShopKiosk.Services
 
         private string GetLocalStructuredTip(string topic)
         {
+            // If the user asked a question, try to return a concise factual summary using Wikipedia snippets when possible
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(topic) && IsQuestion(topic))
+                {
+                    var wiki = GetWikiSnippetsAsync(topic, 1).GetAwaiter().GetResult();
+                    if (wiki.Count > 0)
+                    {
+                        var first = wiki[0];
+                        var summary = first.snippet;
+                        var dot = summary.IndexOf('.');
+                        if (dot > 0) summary = summary.Substring(0, dot + 1);
+
+                        var studyResp = new
+                        {
+                            summary = summary,
+                            tips = new[] { "Read the source for details.", "Compare multiple sources for accuracy." },
+                            action = "Open the first source",
+                            confidence = 0.75,
+                            sources = new[] { first.url }
+                        };
+
+                        return JsonSerializer.Serialize(studyResp);
+                    }
+                }
+            }
+            catch { }
+
+            // Fallback: provide study-focused structured tips
             var tips = new[]
             {
                 "Break the material into 25-minute focused chunks.",
@@ -411,8 +540,38 @@ namespace CoffeeShopKiosk.Services
             return $"You are a helpful study assistant. Provide 3 concise, practical study tips (2-3 sentences each) for the following topic: {topic}. Use an encouraging tone and include a short action item at the end.";
         }
 
+        private bool IsQuestion(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return false;
+            s = s.Trim();
+            var lower = s.ToLowerInvariant();
+            if (s.EndsWith("?")) return true;
+            var words = new[] { "what", "who", "when", "where", "why", "how", "which" };
+            foreach (var w in words) if (lower.StartsWith(w + " ")) return true;
+            return false;
+        }
+
         private string GetLocalTip(string topic)
         {
+            // If it's a question, prefer a factual short answer from Wikipedia snippets when possible
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(topic) && IsQuestion(topic))
+                {
+                    var wiki = GetWikiSnippetsAsync(topic, 1).GetAwaiter().GetResult();
+                    if (wiki.Count > 0)
+                    {
+                        var first = wiki[0];
+                        var summary = first.snippet;
+                        var dot = summary.IndexOf('.');
+                        if (dot > 0) summary = summary.Substring(0, dot + 1);
+
+                        return summary + "\n\nSources:\n" + first.url;
+                    }
+                }
+            }
+            catch { }
+
             // Simple local fallback tips
             if (string.IsNullOrWhiteSpace(topic))
             {

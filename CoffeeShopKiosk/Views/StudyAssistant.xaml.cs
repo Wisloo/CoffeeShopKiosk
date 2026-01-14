@@ -26,10 +26,13 @@ namespace CoffeeShopKiosk.Views
             _vm = new StudyChatViewModel(svc);
             DataContext = _vm;
 
+            // Bindings
             InputBox.SetBinding(System.Windows.Controls.TextBox.TextProperty, new System.Windows.Data.Binding("InputText") { Source = _vm, Mode = System.Windows.Data.BindingMode.TwoWay });
             MessagesList.SetBinding(System.Windows.Controls.ItemsControl.ItemsSourceProperty, new System.Windows.Data.Binding("Messages") { Source = _vm });
-            InputBox.SetBinding(System.Windows.Controls.TextBox.TextProperty, new System.Windows.Data.Binding("InputText") { Source = _vm, Mode = System.Windows.Data.BindingMode.TwoWay });
-            MessagesList.SetBinding(System.Windows.Controls.ItemsControl.ItemsSourceProperty, new System.Windows.Data.Binding("Messages") { Source = _vm });
+
+            // Subscribe to message changes so we can auto-scroll when text updates (streaming partials)
+            foreach (var m in _vm.Messages) m.PropertyChanged += ChatMessage_PropertyChanged;
+            _vm.Messages.CollectionChanged += Messages_CollectionChanged;
         }
 
         private async void Send_Click(object sender, RoutedEventArgs e)
@@ -67,6 +70,60 @@ namespace CoffeeShopKiosk.Views
             if (sender is System.Windows.Controls.Button b && b.Tag is ChatMessage cm)
             {
                 _vm.HelpFeedbackCommand.Execute(System.Tuple.Create(cm, false));
+            }
+        }
+
+        // Try again: resend the user's last query preceding this assistant fallback message
+        private async void TryAgain_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button b && b.Tag is ChatMessage cm)
+            {
+                var messages = _vm.Messages;
+                var idx = messages.IndexOf(cm);
+                for (int i = idx - 1; i >= 0; i--)
+                {
+                    if (messages[i].Role == "user")
+                    {
+                        _vm.InputText = messages[i].Text;
+                        await _vm.Send();
+                        if (MessagesList.Parent is System.Windows.Controls.ScrollViewer sv) sv.ScrollToEnd();
+                        InputBox.Focus();
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Prefill the input box with a suggested rephrasing to help the student ask again
+        private void SuggestRephrase_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button b && b.Tag is ChatMessage cm)
+            {
+                _vm.InputText = "Can you explain that in simpler terms?";
+                InputBox.Focus();
+                InputBox.SelectAll();
+            }
+        }
+
+        private void PromptSamples_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (PromptSamples.SelectedItem is System.Windows.Controls.ComboBoxItem item && item.Content is string s)
+            {
+                _vm.InputText = s;
+                InputBox.Focus();
+                InputBox.SelectAll();
+            }
+        }
+
+        private void Enlarge_Click(object sender, RoutedEventArgs e)
+        {
+            if (WindowState == WindowState.Maximized)
+            {
+                WindowState = WindowState.Normal;
+            }
+            else
+            {
+                WindowState = WindowState.Maximized;
             }
         }
 
@@ -120,6 +177,28 @@ namespace CoffeeShopKiosk.Views
                 await _vm.Send();
                 if (MessagesList.Parent is System.Windows.Controls.ScrollViewer sv) sv.ScrollToEnd();
                 InputBox.Focus();
+            }
+        }
+
+        private void Messages_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                foreach (var it in e.NewItems)
+                {
+                    if (it is ChatMessage cm) cm.PropertyChanged += ChatMessage_PropertyChanged;
+                }
+            }
+        }
+
+        private void ChatMessage_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Text")
+            {
+                // Scroll to end when a message's text changes (streaming updates)
+                Dispatcher.BeginInvoke(new Action(() => {
+                    if (MessagesList.Parent is System.Windows.Controls.ScrollViewer sv) sv.ScrollToEnd();
+                }));
             }
         }
     }

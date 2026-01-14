@@ -15,6 +15,8 @@ namespace CoffeeShopKiosk.ViewModels
         private string _inputText = string.Empty;
         private bool _isBusy;
         private bool _warnedNoApiKey = false;
+        private bool _useChatMode = false; // free-text chat mode
+        private double _messageFontSize = 13.0;
 
         public StudyChatViewModel(IAIService ai)
         {
@@ -23,6 +25,18 @@ namespace CoffeeShopKiosk.ViewModels
             SendCommand = new RelayCommand<object>(async _ => await Send(), _ => !IsBusy);
             ClearCommand = new RelayCommand<object>(_ => Messages.Clear(), _ => !IsBusy);
             HelpFeedbackCommand = new RelayCommand<object>(p => SubmitFeedback(p));
+        }
+
+        public bool UseChatMode
+        {
+            get => _useChatMode;
+            set { _useChatMode = value; OnPropertyChanged(); }
+        }
+
+        public double MessageFontSize
+        {
+            get => _messageFontSize;
+            set { _messageFontSize = value; OnPropertyChanged(); }
         }
 
         public RelayCommand<object> HelpFeedbackCommand { get; }
@@ -78,87 +92,141 @@ namespace CoffeeShopKiosk.ViewModels
                     var settings = new SettingsService();
                     if (!_warnedNoApiKey && string.IsNullOrWhiteSpace(settings.Settings.OpenAIKey))
                     {
-                        Messages.Add(new ChatMessage { Role = "system", Text = "Note: AI responses are sourced from Wikipedia/local fallback since no OpenAI API key is configured. Set an API key in Study Settings to enable remote LLM responses.", Timestamp = DateTimeOffset.Now, Source = "system" });
+                        Messages.Add(new ChatMessage { Role = "system", Text = "Note: No OpenAI API key configured — the assistant will use Wikipedia/local sources. Configure an API key in Study Settings for remote LLM responses.", Timestamp = DateTimeOffset.Now, Source = "system" });
                         _warnedNoApiKey = true;
                     }
                 }
                 catch { }
 
                 // Add placeholder assistant message which we'll update as stream/response arrives
-                var assistantMsg = new ChatMessage { Role = "assistant", Text = string.Empty, Timestamp = DateTimeOffset.Now, Source = "remote" };
+                var assistantMsg = new ChatMessage { Role = "assistant", Text = "Thinking...", Timestamp = DateTimeOffset.Now, Source = "remote" };
                 Messages.Add(assistantMsg);
 
-                // Streaming: update assistant text as partials arrive
+                // Streaming: update assistant text as partials arrive. Pass ChatMode context so the service can produce free-text if requested
+                bool partialStarted = false;
                 var final = await (_ai as Services.AIService)?.ChatStreamAsync(text, partial =>
                 {
-                    // This callback may be on a non-UI thread; marshal to UI
-                    System.Windows.Application.Current.Dispatcher.Invoke(() => {
-                        assistantMsg.Text += partial;
-                        // Keep the UI scrolled — rely on window code to scroll after send
-                    });
-                }) ?? await _ai.ChatAsync(text);
-
-                // If the final response is empty or clearly truncated, replace with a helpful fallback JSON
-                if (string.IsNullOrWhiteSpace(final) || final.Trim() == "{" || (final.Trim().StartsWith("{") && !final.Trim().EndsWith("}")))
-                {
-                    final = "{ \"summary\": \"I couldn't get a full response right now.\", \"tips\": [\"Try again later or check your API key in Visual Settings.\"], \"action\": \"Try again\", \"confidence\": 0.0 }";
-                }
-
-                // parse structured JSON response if possible
-                var parsed = ParseStructuredResponse(final);
-
-                // If parsing failed, attempt up to 2 retries with a strict JSON-only correction prompt
-                if (parsed == null)
-                {
-                    for (int attempt = 0; attempt < 2 && parsed == null; attempt++)
-                    {
-                        var correction = "Please reply with ONLY valid JSON in this format exactly as shown (no surrounding commentary): {\"summary\": \"one-sentence summary\", \"tips\": [\"tip 1\", \"tip 2\"], \"action\": \"one short action\", \"confidence\": 0.0, \"sources\": [\"url1\"] }.\nExample: {\"summary\":\"Focus on problem practice.\",\"tips\":[\"Do 3 problems per topic.\",\"Make a one-page formula sheet.\"],\"action\":\"Start a 25-min Pomodoro\",\"confidence\":0.9,\"sources\":[\"https://en.wikipedia.org/wiki/Studying\"]}.\nPrevious response was: " + final;
-                        var retryResponse = await _ai.ChatAsync(correction);
-                        if (!string.IsNullOrWhiteSpace(retryResponse))
+                    // This callback may be on a non-UI thread; dispatch asynchronously to avoid blocking
+                    System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+                        if (!partialStarted && assistantMsg.Text == "Thinking...")
                         {
-                            parsed = ParseStructuredResponse(retryResponse);
-                            if (parsed != null)
+                            assistantMsg.Text = partial;
+                            partialStarted = true;
+                        }
+                        else
+                        {
+                            assistantMsg.Text += partial;
+                        }
+                    }));
+                }, new { ChatMode = UseChatMode }) ?? await _ai.ChatAsync(text, new { ChatMode = UseChatMode });
+
+                if (UseChatMode)
+                {
+                    // Free-text chat mode: prefer plain text responses but accept JSON when provided
+                    if (string.IsNullOrWhiteSpace(final))
+                    {
+                        assistantMsg.Text = "Sorry, I couldn't generate an answer right now. Try again.";
+                        assistantMsg.Source = "fallback";
+                        assistantMsg.Confidence = 0.0;
+                    }
+                    else
+                    {
+                        var parsedChat = ParseStructuredResponse(final);
+                        if (parsedChat != null)
+                        {
+                            var sb = new System.Text.StringBuilder();
+                            if (!string.IsNullOrWhiteSpace(parsedChat.Summary)) sb.AppendLine(parsedChat.Summary);
+                            if (parsedChat.Tips != null && parsedChat.Tips.Count > 0)
                             {
-                                // Use the parsed correction
-                                final = retryResponse;
-                                break;
+                                foreach (var t in parsedChat.Tips) sb.AppendLine("• " + t);
+                            }
+                            if (!string.IsNullOrWhiteSpace(parsedChat.Action)) sb.AppendLine("Action: " + parsedChat.Action);
+
+                            assistantMsg.Text = sb.ToString().Trim();
+                            assistantMsg.Confidence = parsedChat.Confidence;
+                            assistantMsg.Source = parsedChat.Source ?? "remote";
+                            assistantMsg.Sources.Clear();
+                            if (parsedChat.Sources != null)
+                            {
+                                foreach (var s in parsedChat.Sources) assistantMsg.Sources.Add(s);
                             }
                         }
-                    }
-                }
-
-                if (parsed != null)
-                {
-                    // Format for display
-                    var sb = new System.Text.StringBuilder();
-                    if (!string.IsNullOrWhiteSpace(parsed.Summary)) sb.AppendLine(parsed.Summary);
-                    if (parsed.Tips != null && parsed.Tips.Count > 0)
-                    {
-                        foreach (var t in parsed.Tips) sb.AppendLine("• " + t);
-                    }
-                    if (!string.IsNullOrWhiteSpace(parsed.Action)) sb.AppendLine("Action: " + parsed.Action);
-
-                    assistantMsg.Text = sb.ToString().Trim();
-                    assistantMsg.Confidence = parsed.Confidence;
-                    assistantMsg.Source = parsed.Source ?? "remote";
-                    if (parsed.Sources != null && parsed.Sources.Count > 0)
-                    {
-                        assistantMsg.Sources = parsed.Sources;
+                        else
+                        {
+                            assistantMsg.Text = final.Trim();
+                            assistantMsg.Source = "remote";
+                            assistantMsg.Confidence = 0.0;
+                        }
                     }
                 }
                 else
                 {
-                    assistantMsg.Text = final ?? assistantMsg.Text;
-                    assistantMsg.Source = string.IsNullOrWhiteSpace(final) ? "local" : "remote";
-                }
+                    // Structured mode: existing behavior — attempt to parse and retry corrections if needed
+                    var parsed = ParseStructuredResponse(final);
 
-                // If the assistant text looks like a truncated token (e.g., just "{" or very short), replace with a clear friendly fallback so the user isn't shown raw JSON fragments
-                var shortText = (assistantMsg.Text ?? string.Empty).Trim();
-                if (shortText == "{" || shortText == "}" || shortText.Length <= 3)
-                {
-                    assistantMsg.Text = "Sorry, I couldn't generate a full answer right now. Try again or enable AI debug logging and check the raw response.";
-                    assistantMsg.Source = "fallback";
-                    assistantMsg.Confidence = 0.0;
+                    if (parsed == null)
+                    {
+                        for (int attempt = 0; attempt < 2 && parsed == null; attempt++)
+                        {
+                            var correction = "Please reply with ONLY valid JSON in this format exactly as shown (no surrounding commentary): {\"summary\": \"one-sentence summary\", \"tips\": [\"tip 1\", \"tip 2\"], \"action\": \"one short action\", \"confidence\": 0.0, \"sources\": [\"url1\"] }.\nExample: {\"summary\":\"Focus on problem practice.\",\"tips\":[\"Do 3 problems per topic.\",\"Make a one-page formula sheet.\"],\"action\":\"Start a 25-min Pomodoro\",\"confidence\":0.9,\"sources\":[\"https://en.wikipedia.org/wiki/Studying\"]}.\nPrevious response was: " + final;
+                            var retryResponse = await _ai.ChatAsync(correction);
+                            if (!string.IsNullOrWhiteSpace(retryResponse))
+                            {
+                                parsed = ParseStructuredResponse(retryResponse);
+                                if (parsed != null)
+                                {
+                                    // Use the parsed correction
+                                    final = retryResponse;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (parsed == null)
+                        {
+                            if (string.IsNullOrWhiteSpace(final) || final.Trim() == "{" || (final.Trim().StartsWith("{") && !final.Trim().EndsWith("}")))
+                            {
+                                final = "{ \"summary\": \"I couldn't get a full response right now.\", \"tips\": [\"Try again later or check your API key in Visual Settings.\"], \"action\": \"Try again\", \"confidence\": 0.0 }";
+                                parsed = ParseStructuredResponse(final);
+                            }
+                        }
+
+                    }
+
+                    if (parsed != null)
+                    {
+                        // Format for display
+                        var sb = new System.Text.StringBuilder();
+                        if (!string.IsNullOrWhiteSpace(parsed.Summary)) sb.AppendLine(parsed.Summary);
+                        if (parsed.Tips != null && parsed.Tips.Count > 0)
+                        {
+                            foreach (var t in parsed.Tips) sb.AppendLine("• " + t);
+                        }
+                        if (!string.IsNullOrWhiteSpace(parsed.Action)) sb.AppendLine("Action: " + parsed.Action);
+
+                        assistantMsg.Text = sb.ToString().Trim();
+                        assistantMsg.Confidence = parsed.Confidence;
+                        assistantMsg.Source = parsed.Source ?? "remote";
+                        if (parsed.Sources != null && parsed.Sources.Count > 0)
+                        {
+                            assistantMsg.Sources.Clear();
+                            foreach (var s in parsed.Sources) assistantMsg.Sources.Add(s);
+                        }
+                    }
+                    else
+                    {
+                        assistantMsg.Text = final ?? assistantMsg.Text;
+                        assistantMsg.Source = string.IsNullOrWhiteSpace(final) ? "local" : "remote";
+                    }
+
+                    // If the assistant text looks like a truncated token (e.g., just "{" or very short), replace with a clear friendly fallback so the user isn't shown raw JSON fragments
+                    var shortText = (assistantMsg.Text ?? string.Empty).Trim();
+                    if (shortText == "{" || shortText == "}" || shortText.Length <= 3)
+                    {
+                        assistantMsg.Text = "Sorry, I couldn't generate a full answer right now. Try again or enable AI debug logging and check the raw response.";
+                        assistantMsg.Source = "fallback";
+                        assistantMsg.Confidence = 0.0;
+                    }
                 }
 
             }

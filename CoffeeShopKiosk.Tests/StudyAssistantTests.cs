@@ -39,5 +39,18 @@ namespace CoffeeShopKiosk.Tests
             Assert.IsTrue(assistant.Text.Contains("Corrected summary"));
             Assert.AreEqual(0.85, assistant.Confidence, 0.01);
         }
+
+        [TestMethod]
+        public async Task ChatMode_NoApiKey_ReturnsPlainText()
+        {
+            // This test uses the real AIService with no API key (wiki fallback) to ensure chat mode returns plain text
+            var ai = new CoffeeShopKiosk.Services.AIService();
+            var resp = await ai.ChatAsync("What is the biggest animal in the world?", new { ChatMode = true });
+            Assert.IsFalse(string.IsNullOrWhiteSpace(resp));
+            // We expect either a concise answer or source list; ensure we didn't get truncated JSON or generic study tips
+            Assert.IsFalse(resp.Trim().StartsWith("{"));
+            Assert.IsFalse(resp.Contains("Pomodoro"));
+            Assert.IsFalse(resp.StartsWith("Quick tips"));
+        }
     }
 }

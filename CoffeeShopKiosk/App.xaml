@@ -275,6 +275,7 @@
             <!-- Converters -->
             <converters:BooleanToPeriodConverter x:Key="BooleanToPeriodConverter" />
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+            <converters:InverseBooleanConverter x:Key="InverseBool" />
             <converters:RoleToBrushConverter x:Key="RoleToBrush" />
             <BooleanToVisibilityConverter x:Key="BoolToVis" />
 
